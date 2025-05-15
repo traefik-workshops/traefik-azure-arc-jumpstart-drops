@@ -1,5 +1,7 @@
 # traefik-azure-arc-jumpstart-drops
 
+This repository demonstrates how to create an IaC multi-cluster arc-enabled environemnt. This includes the creatiuon of multiple kuberentes arc-enabled clusters. And a Traefik application, from Azure Arc marketplace, to manage clusters' ingress, and protect our k8s applications with TLS through automated letsencrypt certificate generation. 
+
 ## Prerequisites
 * Clone the Traefik Azure Arc Jumpstart GitHub repository
 
@@ -16,7 +18,7 @@
 
 * [Install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
-* [Install and Set Up kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 * [Install Helm 3](https://helm.sh/docs/intro/install/)
 
@@ -82,3 +84,21 @@
   az extension update --name connectedk8s
   az extension update --name k8s-configuration
   ```
+
+## Deployment
+
+You can deploy the entire stack using the following command or deploy and test each component sequentially.
+
+### Deploy the entire stack
+
+```shell
+terraform init
+terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)"
+```
+
+### Deploy and test each component sequentially
+
+1. [Clusters](0-clusters/README.md)
+2. [Traefik](1-traefik/README.md)
+3. [Routing](2-routing/README.md)
+4. [TLS](3-tls/README.md)
