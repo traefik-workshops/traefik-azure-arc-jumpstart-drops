@@ -1,23 +1,37 @@
-# Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD
+# Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik
 
-The following Jumpstart scenario will guide you on how to use Terraform to deploy Azure Arc marketplace application to Arc-enabled Kubernetes clusters.
+The following Azure Arc Jumpstart Drop demonstrates how to deploy a k8s application to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik.
 
   > **Note:** Please refer to the [README](../README.md) for a list of requirements.
   > **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
   > **Note:** Please refer to the [1-traefik](../1-traefik/README.md) to view the Traefik for Azure Arc marketplace application that will be deployed.
+  > **Note:** Please refer to the [2-routing](../2-routing/README.md) to view the k8s application deployed using FluxCD.
 
 ## Deployment
-* Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
+* Install Traefik Airlines k8s application
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-routing/terraform.tfvars"
+  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-tls/terraform.tfvars"
   ```
 
-* Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters
+* Verify that Traefik Airlines applications are expose through Traefik through the aks cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
+
+  Customers service:
   ```shell
-  az connectedk8s show --name traefik-aks-demo --resource-group traefik-demo
-  az connectedk8s show --name traefik-k3d-demo --resource-group traefik-demo
+  curl https://customers.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
   ```
 
-## How to deploy marketplace application using ARM templates with Terraform
-To be able to deploy Arc specific marketplace application with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure portal when reviewing the marketplace application install and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [Traefik](../traefik.tf) file shows an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
+  Employees service:
+  ```shell
+  curl https://employees.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  ```
+
+  Flights service:
+  ```shell
+  curl https://flights.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  ```
+
+  Tickets service:
+  ```shell
+  curl https://tickets.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  ```
