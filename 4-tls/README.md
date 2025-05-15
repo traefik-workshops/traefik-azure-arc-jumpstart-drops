@@ -47,3 +47,6 @@ The deployment configures Traefik with:
   ```shell
   curl https://tickets.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
   ```
+
+------
+:arrow_backward: [Routing](../3-routing/README.md) | :checkered_flag: [HOME](../README.md)
