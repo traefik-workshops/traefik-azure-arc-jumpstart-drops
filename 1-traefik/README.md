@@ -1,10 +1,30 @@
 # Deploy Traefik for Azure Arc from marketplace to Arc-enabled Kubernetes clusters
 
-The following Azure Arc Jumpstart Drop demonstrates how to deploy Traefik for Azure Arc from marketplace to Arc-enabled Kubernetes clusters.
-  
-  > **Note:** Please refer to the [README](../README.md) for a list of requirements.
+This module demonstrates how to deploy Traefik Proxy from the Azure Arc Marketplace to Arc-enabled Kubernetes clusters using Terraform and ARM templates.
 
-  > **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
+## Features
+
+- **Marketplace Integration**: Deploy Traefik directly from Azure Arc Marketplace
+- **Multi-cluster Support**: Install on both AKS and K3D clusters
+- **Dashboard**: Built-in web UI for monitoring and management
+- **Automatic Configuration**: Pre-configured for common use cases
+
+## Default Configuration
+
+The Traefik deployment includes:
+
+- Dashboard enabled at `http://dashboard.traefik.localhost:8080` (k3d cluster)
+- Default HTTP entrypoint
+  - AKS cluster: 80
+  - k3d cluster: 8000
+- Default HTTPS entrypoint
+  - AKS cluster: 443
+  - k3d cluster: 8443
+- Automatic service discovery
+
+> **Note:** Please refer to the [README](../README.md) for a list of requirements.
+
+> **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
 
 ## Deployment
 * Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform

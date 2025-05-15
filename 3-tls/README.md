@@ -1,14 +1,29 @@
 # Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik
 
-The following Azure Arc Jumpstart Drop demonstrates how to deploy a k8s application to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik.
+This module demonstrates how to enable automatic HTTPS for your services using Traefik's Let's Encrypt integration.
 
-  > **Note:** Please refer to the [README](../README.md) for a list of requirements.
+## TLS Configuration
 
-  > **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
+The deployment configures Traefik with:
 
-  > **Note:** Please refer to the [1-traefik](../1-traefik/README.md) to view the Traefik for Azure Arc marketplace application that will be deployed.
+- **Automatic Certificate Management**: Using Let's Encrypt
+- **HTTP Challenge**: For domain ownership verification
+- **Wildcard Domains**: Using sslip.io for easy testing
+- **Zero-touch Configuration**: Automatic certificate generation and renewal
 
-  > **Note:** Please refer to the [2-routing](../2-routing/README.md) to view the k8s application deployed using FluxCD.
+## Important Notes
+
+- Only the AKS cluster supports Let's Encrypt integration as it requires a public IP
+- K3D cluster will not be able to complete the ACME challenge due to lack of public IP
+- Certificates are automatically stored and renewed by Traefik
+
+> **Note:** Please refer to the [README](../README.md) for a list of requirements.
+
+> **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
+
+> **Note:** Please refer to the [1-traefik](../1-traefik/README.md) to view the Traefik for Azure Arc marketplace application that will be deployed.
+
+> **Note:** Please refer to the [2-routing](../2-routing/README.md) to view the k8s application deployed using FluxCD.
 
 ## Deployment
 * Install Traefik Airlines k8s application

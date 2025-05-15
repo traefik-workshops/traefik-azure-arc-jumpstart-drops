@@ -1,6 +1,20 @@
 # traefik-azure-arc-jumpstart-drops
 
-This repository demonstrates how to create an IaC multi-cluster arc-enabled environemnt. This includes the creatiuon of multiple kuberentes arc-enabled clusters. And a Traefik application, from Azure Arc marketplace, to manage clusters' ingress, and protect our k8s applications with TLS through automated letsencrypt certificate generation. 
+This repository demonstrates how to create an Infrastructure as Code (IaC) multi-cluster Arc-enabled environment using Terraform. The deployment includes:
+
+- Multiple Kubernetes clusters (AKS and k3d) connected to Azure Arc
+- Traefik Proxy deployment from Azure Arc Marketplace
+- Sample microservices application deployment using FluxCD
+- Automated ingress management and TLS certificate generation using Let's Encrypt
+
+## Architecture
+
+The deployment is split into four main components:
+
+1. **Clusters**: AKS and K3D cluster creation and Arc enablement
+2. **Traefik**: Deployment of Traefik Proxy from Azure Arc Marketplace
+3. **Routing**: Sample application deployment with basic HTTP routing
+4. **TLS**: Automatic HTTPS with Let's Encrypt certificates
 
 ## Prerequisites
 * Clone the Traefik Azure Arc Jumpstart GitHub repository
@@ -16,7 +30,7 @@ This repository demonstrates how to create an IaC multi-cluster arc-enabled envi
 
 * [Install k3d](https://k3d.io/stable/#installation)
 
-* [Install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+* [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
 * [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
@@ -98,7 +112,7 @@ terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)
 
 ### Deploy and test each component sequentially
 
-1. [Clusters](0-clusters/README.md)
-2. [Traefik](1-traefik/README.md)
-3. [Routing](2-routing/README.md)
-4. [TLS](3-tls/README.md)
+1. [Clusters](1-clusters/README.md)
+2. [Traefik](2-traefik/README.md)
+3. [Routing](3-routing/README.md)
+4. [TLS](4-tls/README.md)
