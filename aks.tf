@@ -50,3 +50,23 @@ resource "null_resource" "arc_aks_cluster" {
   count = var.enable_aks ? 1 : 0
   depends_on = [ azurerm_kubernetes_cluster.traefik_demo, azurerm_kubernetes_cluster_node_pool.traefik_demo ]
 }
+
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].host
+  client_certificate     = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_certificate
+  client_key             = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_key
+  cluster_ca_certificate = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].cluster_ca_certificate
+}
+
+data "kubernetes_service" "traefik" {
+  metadata {
+    name      = "traefik"
+    namespace = "traefik"
+  }
+
+  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
+}
+
+output "aks_traefik_ip" {
+  value = data.kubernetes_service.traefik.status.0.load_balancer.0.ingress.0.ip
+}
