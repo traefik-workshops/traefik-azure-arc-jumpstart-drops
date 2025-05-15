@@ -13,7 +13,7 @@ The following Azure Arc Jumpstart Drop demonstrates how to deploy a k8s applicat
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-routing/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are expose through Traefik through the k3d cluster. You can choose either of the clusters to test against.
+* Verify that Traefik Airlines applications are expose through Traefik through the k3d and aks clusters. You can choose either of the clusters to test against.
 
   K3D url:
   ```shell
@@ -22,7 +22,7 @@ The following Azure Arc Jumpstart Drop demonstrates how to deploy a k8s applicat
 
   AKS url:
   ```shell
-  url=$(kubectl get svc --context $(terraform output -raw aks_cluster_name) --namespace traefik traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  url=$(terraform output -raw aks_traefik_ip)
   ```
 
   Customers service:

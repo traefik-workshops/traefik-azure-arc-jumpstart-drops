@@ -39,7 +39,7 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
   git_repository {
     url = "https://github.com/traefik-workshops/traefik-airlines.git"
     reference_type = "tag"
-    reference_value = "v0.0.4"
+    reference_value = "v0.0.5"
   }
 
   kustomizations {

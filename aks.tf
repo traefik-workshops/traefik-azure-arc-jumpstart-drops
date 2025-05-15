@@ -64,9 +64,10 @@ data "kubernetes_service" "traefik" {
     namespace = "traefik"
   }
 
+  count = var.enable_aks ? 1 : 0
   depends_on = [ azurerm_resource_group_template_deployment.traefik ]
 }
 
 output "aks_traefik_ip" {
-  value = data.kubernetes_service.traefik.status.0.load_balancer.0.ingress.0.ip
+  value = var.enable_aks ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
 }
