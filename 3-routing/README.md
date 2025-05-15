@@ -23,7 +23,7 @@ The Traefik Airlines demo application consists of four microservices:
 * Install Traefik Airlines k8s application
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-routing/terraform.tfvars"
+  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```
 
 * Verify that Traefik Airlines applications are expose through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.

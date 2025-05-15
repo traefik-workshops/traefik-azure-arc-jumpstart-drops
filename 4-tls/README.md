@@ -23,7 +23,7 @@ The deployment configures Traefik with:
 * Install Traefik Airlines k8s application
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-tls/terraform.tfvars"
+  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
   ```
 
 * Verify that Traefik Airlines applications are expose through Traefik through the AKS cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.

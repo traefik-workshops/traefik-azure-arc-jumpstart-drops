@@ -28,7 +28,7 @@ The Traefik deployment includes:
 * Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="1-traefik/terraform.tfvars"
+  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
   ```
 
 * Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters

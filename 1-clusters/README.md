@@ -26,7 +26,7 @@ The deployment can be customized through the following variables in `terraform.t
 Install AKS and k3d clusters using Terraform:
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="0-clusters/terraform.tfvars"
+  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
   ```
 
 ## Verify
