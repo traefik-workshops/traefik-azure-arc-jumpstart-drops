@@ -1,11 +1,11 @@
 # traefik-azure-arc-jumpstart-drops
 
-This repository demonstrates how to create an Infrastructure as Code (IaC) multi-cluster Arc-enabled environment using Terraform. The deployment includes:
+This repository demonstrates how to create a Terraform based Infrastructure as Code (IaC) multi-cluster Arc-enabled Kubernetes environment that serves traffic through Traefik Proxy to multiple sample microservices applications across the clusters. The deployment includes:
 
 - Multiple Kubernetes clusters (AKS and k3d) connected to Azure Arc
 - Traefik Proxy deployment from Azure Arc Marketplace
 - Sample microservices application deployment using FluxCD
-- Automated ingress management and TLS certificate generation using Let's Encrypt
+- Automated TLS certificate generation and management using Let's Encrypt and Traefik
 
 ## Architecture
 
