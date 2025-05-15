@@ -19,6 +19,12 @@ The Traefik Airlines demo application consists of four microservices:
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
 
+## Configuration
+
+The deployment can be customized through the following variables in `terraform.tfvars`:
+
+- `enable_traefik_airlines`: Enable/disable Traefik Airlines deployment
+
 ## Deployment
 * Install Traefik Airlines k8s application
   ```shell

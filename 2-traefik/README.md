@@ -24,6 +24,12 @@ The Traefik deployment includes:
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
 
+## Configuration
+
+The deployment can be customized through the following variables in `terraform.tfvars`:
+
+- `enable_traefik`: Enable/disable Traefik deployment
+
 ## Deployment
 * Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
   ```shell

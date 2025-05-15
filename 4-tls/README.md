@@ -19,6 +19,12 @@ The deployment configures Traefik with:
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
 
+## Configuration
+
+The deployment can be customized through the following variables in `terraform.tfvars`:
+
+- `enable_traefik_airlines_tls`: Enable/disable Traefik Airlines TLS deployment
+
 ## Deployment
 * Install Traefik Airlines k8s application
   ```shell
