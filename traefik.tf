@@ -1,3 +1,23 @@
+locals {
+  traefik = {
+    "deployment.replicas": "1",
+    "global.azure.enabled": true,
+    "ingressClass.enabled": false,
+    "ingressRoute.dashboard.enabled": "true",
+    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik`) || Host(`dashboard.traefik.localhost`)",
+    "ports.traefik.expose.default": "true",
+    "versionOverride": "v3.3.6"
+  }
+
+  certificatesResolvers = var.enable_traefik_airlines_tls ? {
+    "certificatesResolvers.traefik-airlines.acme.email": "zaid@traefik.io",
+    "certificatesResolvers.traefik-airlines.acme.storage": "/data/acme.json",
+    "certificatesResolvers.traefik-airlines.acme.httpChallenge.entryPoint": "web"
+  } : {}
+
+  config = merge(local.traefik, local.certificatesResolvers)
+}
+
 resource "azurerm_resource_group_template_deployment" "traefik" {
   name                = "traefik"
   resource_group_name = azurerm_resource_group.traefik_demo.name
@@ -20,15 +40,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "configurationProtectedSettings": {},
-                "configurationSettings": {
-                    "deployment.replicas": "1",
-                    "global.azure.enabled": true,
-                    "ingressClass.enabled": false,
-                    "ingressRoute.dashboard.enabled": "true",
-                    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik`) || Host(`dashboard.traefik.localhost`)",
-                    "ports.traefik.expose.default": "true",
-                    "versionOverride": "v3.3.6"
-                },
+                "configurationSettings": ${jsonencode(local.config)},
                 "extensionType": "TraefikLabs.TraefikProxyOnArc",
                 "releaseTrain": "stable",
                 "scope": {
