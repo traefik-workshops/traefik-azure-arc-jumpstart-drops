@@ -32,7 +32,7 @@ The deployment can be customized through the following variables in `terraform.t
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are expose through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
+* Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
 
   k3d url:
   ```shell

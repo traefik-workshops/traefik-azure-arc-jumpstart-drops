@@ -32,7 +32,7 @@ The deployment can be customized through the following variables in `terraform.t
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are expose through Traefik through the AKS cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
+* Verify that Traefik Airlines applications are exposed through Traefik through the AKS cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
 
   Customers service:
   ```shell

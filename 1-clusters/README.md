@@ -44,7 +44,7 @@ Verify that both AKS and k3d have been created successfully, and are accessible 
 
 ## How to connect your clusters to Azure Arc with Terraform
 
-Connecting Kuberenets clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](../aks.tf) and [k3d](../k3d.tf)
+Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](../aks.tf) and [k3d](../k3d.tf)
 
 ```hcl
 resource "null_resource" "arc_k3d_cluster" {
