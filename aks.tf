@@ -29,6 +29,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "traefik_demo" {
   vm_size               = var.aks_cluster_machine_type
   node_count            = var.aks_cluster_node_count
 
+  upgrade_settings {
+    drain_timeout_in_minutes      = 0
+    max_surge                     = "10%"
+    node_soak_duration_in_minutes = 0
+  }
+
   count = var.enable_aks ? 1 : 0
 }
 
@@ -53,9 +59,9 @@ resource "null_resource" "arc_aks_cluster" {
 
 provider "kubernetes" {
   host                   = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].host
-  client_certificate     = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_certificate
-  client_key             = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_key
-  cluster_ca_certificate = azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].cluster_ca_certificate
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.traefik_demo[0].kube_config[0].cluster_ca_certificate)
 }
 
 data "kubernetes_service" "traefik" {
