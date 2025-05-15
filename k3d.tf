@@ -1,4 +1,5 @@
 locals {
+  k3d_cluster_name     = "k3d-${k3d_cluster.traefik_demo[0].name}"
   arc_k3d_cluster_name = "traefik-arc-k3d-demo"
   arc_k3d_cluster_id   = "/subscriptions/${var.azure_subscription_id}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_k3d_cluster_name}"
 }
@@ -37,7 +38,7 @@ resource "null_resource" "arc_k3d_cluster" {
   provisioner "local-exec" {
     command = <<EOT
       az connectedk8s connect \
-        --kube-context k3d-traefik-demo \
+        --kube-context ${local.k3d_cluster_name} \
         --name ${local.arc_k3d_cluster_name} \
         --resource-group ${azurerm_resource_group.traefik_demo.name}
     EOT

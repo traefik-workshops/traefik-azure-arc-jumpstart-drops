@@ -1,10 +1,11 @@
 locals {
+  aks_cluster_name     = "traefik-aks-demo"
   arc_aks_cluster_name = "traefik-arc-aks-demo"
   arc_aks_cluster_id   = "/subscriptions/${var.azure_subscription_id}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_aks_cluster_name}"
 }
 
 resource "azurerm_kubernetes_cluster" "traefik_demo" {
-  name                = "traefik-aks-demo"
+  name                = local.aks_cluster_name
   location            = azurerm_resource_group.traefik_demo.location
   kubernetes_version  = var.aks_version
   resource_group_name = azurerm_resource_group.traefik_demo.name
@@ -50,10 +51,10 @@ resource "null_resource" "arc_aks_cluster" {
       az aks get-credentials \
         --overwrite-existing \
         --resource-group ${azurerm_resource_group.traefik_demo.name} \
-        --name ${azurerm_kubernetes_cluster.traefik_demo[0].name}
+        --name ${local.aks_cluster_name}
       
       az connectedk8s connect \
-        --kube-context ${azurerm_kubernetes_cluster.traefik_demo[0].name} \
+        --kube-context ${local.aks_cluster_name} \
         --name ${local.arc_aks_cluster_name} \
         --resource-group ${azurerm_resource_group.traefik_demo.name}
     EOT

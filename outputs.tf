@@ -5,10 +5,10 @@ output "resource_group_name" {
 
 output "k3d_cluster_name" {
   description = "K3D cluster name"
-  value = "k3d-${k3d_cluster.traefik_demo[0].name}"
+  value = local.k3d_cluster_name
 }
 
 output "aks_cluster_name" {
   description = "AKS cluster name"
-  value = azurerm_kubernetes_cluster.traefik_demo[0].name
+  value = local.aks_cluster_name
 }
