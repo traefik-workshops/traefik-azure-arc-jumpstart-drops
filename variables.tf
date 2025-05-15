@@ -6,7 +6,7 @@ variable "enable_aks" {
 
 variable "enable_k3d" {
   type        = bool
-  description = "Enable K3D cluster"
+  description = "Enable k3d cluster"
   default     = true
 }
 

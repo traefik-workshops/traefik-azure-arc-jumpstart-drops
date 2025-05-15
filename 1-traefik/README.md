@@ -5,7 +5,7 @@ This module demonstrates how to deploy Traefik Proxy from the Azure Arc Marketpl
 ## Features
 
 - **Marketplace Integration**: Deploy Traefik directly from Azure Arc Marketplace
-- **Multi-cluster Support**: Install on both AKS and K3D clusters
+- **Multi-cluster Support**: Install on both AKS and k3d clusters
 - **Dashboard**: Built-in web UI for monitoring and management
 - **Automatic Configuration**: Pre-configured for common use cases
 

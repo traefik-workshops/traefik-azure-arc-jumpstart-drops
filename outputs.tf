@@ -4,7 +4,7 @@ output "resource_group_name" {
 }
 
 output "k3d_cluster_name" {
-  description = "K3D cluster name"
+  description = "k3d cluster name"
   value = local.k3d_cluster_name
 }
 

@@ -11,7 +11,7 @@ This repository demonstrates how to create an Infrastructure as Code (IaC) multi
 
 The deployment is split into four main components:
 
-1. **Clusters**: AKS and K3D cluster creation and Arc enablement
+1. **Clusters**: AKS and k3d cluster creation and Arc enablement
 2. **Traefik**: Deployment of Traefik Proxy from Azure Arc Marketplace
 3. **Routing**: Sample application deployment with basic HTTP routing
 4. **TLS**: Automatic HTTPS with Let's Encrypt certificates

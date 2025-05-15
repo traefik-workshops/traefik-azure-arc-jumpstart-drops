@@ -30,9 +30,9 @@ The Traefik Airlines demo application consists of four microservices:
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-routing/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are expose through Traefik through the k3d and aks clusters. You can choose either of the clusters to test against.
+* Verify that Traefik Airlines applications are expose through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
 
-  K3D url:
+  k3d url:
   ```shell
   url="localhost:8000"
   ```

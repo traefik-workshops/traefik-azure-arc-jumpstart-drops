@@ -1,13 +1,13 @@
 # IaC Arc-enabled Kubernetes multi-cluster deployment using Terraform
 
-This module demonstrates how to deploy and Arc-enable both AKS and K3D clusters using Terraform. The deployment includes:
+This module demonstrates how to deploy and Arc-enable both AKS and k3d clusters using Terraform. The deployment includes:
 
 - **AKS Cluster**:
   - Single node pool with configurable VM size
   - Exposed ports for ingress (80, 443, 8080)
   - Azure Arc extension installation
 
-- **K3D Cluster**:
+- **k3d Cluster**:
   - Local Kubernetes cluster using k3s in Docker
   - Exposed ports for ingress (8000, 8443, 8080)
   - Azure Arc extension installation

@@ -14,7 +14,7 @@ The deployment configures Traefik with:
 ## Important Notes
 
 - Only the AKS cluster supports Let's Encrypt integration as it requires a public IP
-- K3D cluster will not be able to complete the ACME challenge due to lack of public IP
+- k3d cluster will not be able to complete the ACME challenge due to lack of public IP
 - Certificates are automatically stored and renewed by Traefik
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
@@ -32,7 +32,7 @@ The deployment configures Traefik with:
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-tls/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are expose through Traefik through the aks cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
+* Verify that Traefik Airlines applications are expose through Traefik through the AKS cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
 
   Customers service:
   ```shell
