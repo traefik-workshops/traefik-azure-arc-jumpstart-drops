@@ -24,8 +24,6 @@ The Traefik deployment includes:
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
 
-> **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
-
 ## Deployment
 * Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
   ```shell

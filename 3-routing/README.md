@@ -19,10 +19,6 @@ The Traefik Airlines demo application consists of four microservices:
 
 > **Note:** Please refer to the [README](../README.md) for a list of requirements.
 
-> **Note:** Please refer to the [0-clusters](../0-clusters/README.md) to view the Azure Arc-enabled Kubernetes clusters that will be deployed.
-
-> **Note:** Please refer to the [1-traefik](../1-traefik/README.md) to view the Traefik for Azure Arc marketplace application that will be deployed.
-
 ## Deployment
 * Install Traefik Airlines k8s application
   ```shell
