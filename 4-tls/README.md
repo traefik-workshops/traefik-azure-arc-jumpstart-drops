@@ -49,4 +49,4 @@ The deployment configures Traefik with:
   ```
 
 ------
-:arrow_backward: [Routing](../3-routing/README.md) | :checkered_flag: [HOME](../README.md)
+:arrow_backward: [Routing](../3-routing/README.md) | [HOME](../README.md) :checkered_flag:

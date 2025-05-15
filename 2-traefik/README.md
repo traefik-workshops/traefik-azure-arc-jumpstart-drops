@@ -45,4 +45,4 @@ The Traefik deployment includes:
 To be able to deploy Arc specific marketplace applications with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure portal when reviewing the marketplace application install, and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [Traefik](../traefik.tf) file shows an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
 
 ------
-:arrow_backward: [Clusters](../1-clusters/README.md) | :house: [HOME](../README.md) | :arrow_forward: [Routing](../3-routing/README.md)
+:arrow_backward: [Clusters](../1-clusters/README.md) | :house: [HOME](../README.md) | [Routing](../3-routing/README.md) :arrow_forward:

@@ -60,4 +60,4 @@ resource "null_resource" "arc_k3d_cluster" {
 ```
 
 ------
-:house: [HOME](../README.md) | :arrow_forward: [Traefik](../2-traefik/README.md)
+:house: [HOME](../README.md) | [Traefik](../2-traefik/README.md) :arrow_forward:
