@@ -93,7 +93,7 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
 
 ## Getting Started
 
-Clone the Traefik Azure Arc Jumpstart GitHub repository
+Clone the Traefik Azure Arc Jumpstart GitHub repository:
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
@@ -111,6 +111,7 @@ Install AKS and k3d clusters using Terraform:
 ## Testing
 
 Verify that both AKS and k3d have been created successfully, and are accessible using `kubectl`:
+
 
   For AKS cluster:
   ```shell
