@@ -5,11 +5,7 @@
 This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled Kubernetes clusters using Terraform and ARM templates.
 
 ## Prerequisites
-* Clone the Traefik Azure Arc Jumpstart GitHub repository
 
-    ```shell
-    git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
-    ```
 * [Install or update Azure CLI to version 2.65.0 and above](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest). Use the below command to check your current installed version.
 
   ```shell
@@ -85,14 +81,23 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
   az extension update --name k8s-configuration
   ```
 
-## Deployment
+## Getting Started
+
+Clone the Traefik Azure Arc Jumpstart GitHub repository
+
+  ```shell
+  git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
+  ```
+
 * Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
   ```shell
+  cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
   ```
 
 ## Testing
+
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
   ```shell
@@ -105,48 +110,49 @@ You can now view your Traefik dashboard locally.
 [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
 
 ## ARM Template Example
+
 To be able to deploy Arc specific marketplace applications with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure portal when reviewing the marketplace application install, and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [traefik.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/traefik.tf) file shows an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
 
-```hcl
-resource "azurerm_resource_group_template_deployment" "traefik" {
-  name                = "traefik"
-  resource_group_name = azurerm_resource_group.traefik_demo.name
-  deployment_mode     = "Incremental"
-  template_content = <<TEMPLATE
-{
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "parameters": {},
-    "resources": [
-        {
-            "apiVersion": "2023-05-01",
-            "name": "traefik",
-            "plan": {
-                "name": "traefik-byol",
-                "product": "traefik-on-arc",
-                "publisher": "containous"
-            },
-            "properties": {
-                "autoUpgradeMinorVersion": "true",
-                "configurationProtectedSettings": {},
-                "configurationSettings": ${jsonencode(local.config)},
-                "extensionType": "TraefikLabs.TraefikProxyOnArc",
-                "releaseTrain": "stable",
-                "scope": {
-                    "cluster": {
-                        "releaseNamespace": "traefik"
-                    }
-                }
-            },
-            "scope": "Microsoft.Kubernetes/connectedClusters/traefik-arc-aks-demo",
-            "type": "Microsoft.KubernetesConfiguration/extensions"
-        }
-    ]
-}
-TEMPLATE
-}
-```
+  ```hcl
+  resource "azurerm_resource_group_template_deployment" "traefik" {
+    name                = "traefik"
+    resource_group_name = azurerm_resource_group.traefik_demo.name
+    deployment_mode     = "Incremental"
+    template_content = <<TEMPLATE
+  {
+      "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "outputs": {},
+      "parameters": {},
+      "resources": [
+          {
+              "apiVersion": "2023-05-01",
+              "name": "traefik",
+              "plan": {
+                  "name": "traefik-byol",
+                  "product": "traefik-on-arc",
+                  "publisher": "containous"
+              },
+              "properties": {
+                  "autoUpgradeMinorVersion": "true",
+                  "configurationProtectedSettings": {},
+                  "configurationSettings": ${jsonencode(local.config)},
+                  "extensionType": "TraefikLabs.TraefikProxyOnArc",
+                  "releaseTrain": "stable",
+                  "scope": {
+                      "cluster": {
+                          "releaseNamespace": "traefik"
+                      }
+                  }
+              },
+              "scope": "Microsoft.Kubernetes/connectedClusters/traefik-arc-aks-demo",
+              "type": "Microsoft.KubernetesConfiguration/extensions"
+          }
+      ]
+  }
+  TEMPLATE
+  }
+  ```
 
 ## Teardown
 

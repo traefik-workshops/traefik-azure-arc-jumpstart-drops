@@ -1,8 +1,10 @@
 # Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik
 
-This module demonstrates how to deploy and expose a microservices application across multiple Arc-enabled Kubernetes clusters using FluxCD and Traefik.
+## Overview
 
-## Application Architecture
+This drop demonstrates how to deploy and expose a microservices application across multiple Arc-enabled Kubernetes clusters using FluxCD and Traefik.
+
+### Application Architecture
 
 The Traefik Airlines demo application consists of four microservices:
 
@@ -11,28 +13,107 @@ The Traefik Airlines demo application consists of four microservices:
 - **Flights Service**: Manages flight schedules and availability
 - **Tickets Service**: Processes ticket bookings and reservations
 
-## Deployment Configuration
+### Deployment Configuration
 
 - **GitOps with FluxCD**: Automated deployment from Git repository
 - **Traefik Integration**: Automatic service discovery and routing
 - **Multi-cluster Support**: Services accessible on both AKS and k3d clusters
 
-> **Note:** Please refer to the [README](../README.md) for a list of requirements.
+## Prerequisites
 
-## Configuration
+* [Install or update Azure CLI to version 2.65.0 and above](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest). Use the below command to check your current installed version.
 
-The deployment can be customized through the following variables in `terraform.tfvars`:
-
-- `enable_traefik_airlines`: Enable/disable Traefik Airlines deployment
-
-## Deployment
-* Install Traefik Airlines k8s application
   ```shell
+  az --version
+  ```
+
+* [Install k3d](https://k3d.io/stable/#installation)
+
+* [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+
+* [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+
+* Create Azure service principal (SP)
+
+  The Azure service principal assigned with the "Contributor" role is required to complete the scenario and its related automation. To create it, log in to your Azure account run the below command (you could also do this in [Azure Cloud Shell](https://shell.azure.com/)).
+
+    ```shell
+    az login
+    subscriptionId=$(az account show --query id --output tsv)
+    az ad sp create-for-rbac -n "<Unique SP Name>" --role "Contributor" --scopes /subscriptions/$subscriptionId
+    ```
+
+    For example:
+
+    ```shell
+    az login
+    subscriptionId=$(az account show --query id --output tsv)
+    az ad sp create-for-rbac -n "JumpstartArcK8s" --role "Contributor" --scopes /subscriptions/$subscriptionId
+    ```
+
+    Output should look like this:
+
+    ```json
+    {
+    "appId": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "displayName": "JumpstartArcK8s",
+    "password": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "tenant": "XXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    }
+    ```
+
+    > **Note:** If you create multiple subsequent role assignments on the same service principal, your client secret (password) will be destroyed and recreated each time. Therefore, make sure you grab the correct password.
+
+* [Enable subscription with](https://learn.microsoft.com/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider) the two resource providers for Azure Arc-enabled Kubernetes. Registration is an asynchronous process, and registration may take approximately 10 minutes.
+
+  ```shell
+  az provider register --namespace Microsoft.Kubernetes
+  az provider register --namespace Microsoft.KubernetesConfiguration
+  az provider register --namespace Microsoft.ExtendedLocation
+  az provider register --namespace Microsoft.ContainerService
+  ```
+
+  You can monitor the registration process with the following commands:
+
+  ```shell
+  az provider show -n Microsoft.Kubernetes -o table
+  az provider show -n Microsoft.KubernetesConfiguration -o table
+  az provider show -n Microsoft.ExtendedLocation -o table
+  az provider show -n Microsoft.ContainerService -o table
+  ```
+
+* Install the Azure Arc for Kubernetes CLI extensions ***connectedk8s*** and ***k8s-configuration***:
+
+  ```shell
+  az extension add --name connectedk8s
+  az extension add --name k8s-configuration
+  ```
+
+  > **Note:** If you already used this guide before and/or have the extensions installed, use the below commands.
+
+  ```shell
+  az extension update --name connectedk8s
+  az extension update --name k8s-configuration
+  ```
+
+## Getting Started
+
+Clone the Traefik Azure Arc Jumpstart GitHub repository
+
+  ```shell
+  git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
+  ```
+
+Install Traefik Airlines k8s application
+  ```shell
+  cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```
 
-* Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
+## Testing
+
+Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
 
   k3d url:
   ```shell
@@ -62,4 +143,31 @@ The deployment can be customized through the following variables in `terraform.t
   Tickets service:
   ```shell
   curl http://$url -H "Host: tickets.traefik-airlines"
+  ```
+
+## Use FluxCD to deploy Traefik Airlines
+Azure Arc Kubernetes' recommedned GitOps tool is FluxCD. FluxCD is used to deploy the Traefik Airlines application to the AKS cluster using Terraform in the follow code snippet.
+
+  ```hcl
+  resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
+    name       = "traefik-airlines"
+    cluster_id = "traefik-arc-aks-demo"
+    namespace  = "traefik-airlines"
+
+    git_repository {
+      url = "https://github.com/traefik-workshops/traefik-airlines.git"
+      reference_type = "tag"
+      reference_value = "v0.0.6"
+    }
+
+    kustomizations {
+      name = "traefik-airlines"
+    }
+  }
+  ```
+
+## Teardown
+
+  ```shell
+  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```

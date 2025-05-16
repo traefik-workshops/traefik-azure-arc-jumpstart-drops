@@ -15,11 +15,7 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
   - Azure Arc extension installation
 
 ## Prerequisites
-* Clone the Traefik Azure Arc Jumpstart GitHub repository
 
-    ```shell
-    git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
-    ```
 * [Install or update Azure CLI to version 2.65.0 and above](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest). Use the below command to check your current installed version.
 
   ```shell
@@ -95,9 +91,17 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
   az extension update --name k8s-configuration
   ```
 
-## Deployment
+## Getting Started
+
+Clone the Traefik Azure Arc Jumpstart GitHub repository
+
+  ```shell
+  git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
+  ```
+
 Install AKS and k3d clusters using Terraform:
   ```shell
+  cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
     -var="azure_subscription_id=$(az account show --query id -o tsv)" \
@@ -105,6 +109,7 @@ Install AKS and k3d clusters using Terraform:
   ```
 
 ## Testing
+
 Verify that both AKS and k3d have been created successfully, and are accessible using `kubectl`:
 
   For AKS cluster:
@@ -118,20 +123,21 @@ Verify that both AKS and k3d have been created successfully, and are accessible 
   ```
 
 ## Arc-enable AKS and k3d clusters
+
 Connecting Kuberenets clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf) and [k3d](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/k3d.tf)
 
-```hcl
-resource "null_resource" "arc_k3d_cluster" {
-  provisioner "local-exec" {
-    command = <<EOT
-      az connectedk8s connect \
-        --kube-context k3d-traefik-demo \
-        --name ${local.arc_k3d_cluster_name} \
-        --resource-group ${azurerm_resource_group.traefik_demo.name}
-    EOT
+  ```hcl
+  resource "null_resource" "arc_k3d_cluster" {
+    provisioner "local-exec" {
+      command = <<EOT
+        az connectedk8s connect \
+          --kube-context k3d-traefik-demo \
+          --name ${local.arc_k3d_cluster_name} \
+          --resource-group ${azurerm_resource_group.traefik_demo.name}
+      EOT
+    }
   }
-}
-```
+  ```
 
 ## Teardown
 
