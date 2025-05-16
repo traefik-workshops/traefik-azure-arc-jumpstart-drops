@@ -89,7 +89,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-* Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
+Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
