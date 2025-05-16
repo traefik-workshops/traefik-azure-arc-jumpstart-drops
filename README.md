@@ -105,7 +105,7 @@ You can deploy the entire stack using the following command or deploy and test e
 
 ```shell
 terraform init
-terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)"
+terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)"
 ```
 
 ### Deploy and test each component sequentially

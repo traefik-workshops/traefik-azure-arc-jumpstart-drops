@@ -104,7 +104,7 @@ Install AKS and k3d clusters using Terraform:
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var="azure_subscription_id=$(az account show --query id -o tsv)" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var-file="1-clusters/terraform.tfvars"
   ```
 
@@ -115,13 +115,13 @@ Verify that both AKS and k3d have been created successfully, and are accessible 
 ### AKS
 
   ```shell
-  kubectl --context=$(terraform output -raw aks_cluster_name) get nodes
+  kubectl --context=$(terraform output -raw aksClusterName) get nodes
   ```
 
 ### k3d
 
   ```shell
-  kubectl --context=$(terraform output -raw k3d_cluster_name) get nodes
+  kubectl --context=$(terraform output -raw k3dClusterName) get nodes
   ```
 
 ## Arc-enable AKS and k3d clusters
@@ -144,5 +144,5 @@ Connecting Kuberenets clusters to Azure Arc is only possible through the Azure C
 ## Teardown
 
   ```shell
-  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
+  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
   ```

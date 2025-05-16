@@ -106,7 +106,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
 Install Traefik Airlines k8s application
   ```shell
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
+  terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
   ```
 
 ## Testing
@@ -115,26 +115,26 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
 
   Customers service:
   ```shell
-  curl https://customers.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  curl https://customers.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
   ```
 
   Employees service:
   ```shell
-  curl https://employees.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  curl https://employees.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
   ```
 
   Flights service:
   ```shell
-  curl https://flights.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  curl https://flights.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
   ```
 
   Tickets service:
   ```shell
-  curl https://tickets.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  curl https://tickets.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
   ```
 
 ## Teardown
 
   ```shell
-  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
+  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
   ```

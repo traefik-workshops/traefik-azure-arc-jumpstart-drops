@@ -28,7 +28,7 @@ variable "enable_traefik_airlines_tls" {
   default     = true
 }
 
-variable "azure_subscription_id" {
+variable "azureSubscriptionId" {
   type        = string
   description = "Azure subscription ID to use for the deployment"
   default     = ""

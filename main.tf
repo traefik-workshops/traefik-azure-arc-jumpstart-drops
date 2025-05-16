@@ -10,7 +10,7 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
-  subscription_id = var.azure_subscription_id
+  subscription_id = var.azureSubscriptionId
 }
 
 resource "azurerm_resource_group" "traefik_demo" {

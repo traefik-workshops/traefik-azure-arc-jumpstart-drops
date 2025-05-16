@@ -93,7 +93,7 @@ Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_M
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
+  terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
   ```
 
 ## Testing
@@ -101,8 +101,8 @@ Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_M
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
   ```shell
-  az connectedk8s show --name traefik-arc-aks-demo --resource-group $(terraform output -raw resource_group_name)
-  az connectedk8s show --name traefik-arc-k3d-demo --resource-group $(terraform output -raw resource_group_name)
+  az connectedk8s show --name traefik-arc-aks-demo --resource-group $(terraform output -raw resourceGroupName)
+  az connectedk8s show --name traefik-arc-k3d-demo --resource-group $(terraform output -raw resourceGroupName)
   ```
 
 You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
@@ -155,5 +155,5 @@ To be able to deploy Arc specific marketplace applications with Terraform, you n
 ## Teardown
 
   ```shell
-  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
+  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
   ```

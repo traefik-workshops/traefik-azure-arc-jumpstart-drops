@@ -108,7 +108,7 @@ Install Traefik Airlines k8s application
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
-  terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
+  terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```
 
 ## Testing
@@ -124,7 +124,7 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
 ### AKS
 
   ```shell
-  url=$(terraform output -raw aks_traefik_ip)
+  url=$(terraform output -raw aksTraefikIp)
   ```
 ### Services
 
@@ -172,5 +172,5 @@ Azure Arc Kubernetes' recommedned GitOps tool is FluxCD. FluxCD is used to deplo
 ## Teardown
 
   ```shell
-  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
+  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="3-routing/terraform.tfvars"
   ```

@@ -1,7 +1,7 @@
 locals {
   aks_cluster_name     = "traefik-aks-demo"
   arc_aks_cluster_name = "traefik-arc-aks-demo"
-  arc_aks_cluster_id   = "/subscriptions/${var.azure_subscription_id}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_aks_cluster_name}"
+  arc_aks_cluster_id   = "/subscriptions/${var.azureSubscriptionId}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_aks_cluster_name}"
 }
 
 resource "azurerm_kubernetes_cluster" "traefik_demo" {
@@ -81,6 +81,6 @@ data "kubernetes_service" "traefik" {
   depends_on = [ azurerm_resource_group_template_deployment.traefik ]
 }
 
-output "aks_traefik_ip" {
+output "aksTraefikIp" {
   value = var.enable_aks ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
 }

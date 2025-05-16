@@ -1,7 +1,7 @@
 locals {
   k3d_cluster_name     = "k3d-${k3d_cluster.traefik_demo[0].name}"
   arc_k3d_cluster_name = "traefik-arc-k3d-demo"
-  arc_k3d_cluster_id   = "/subscriptions/${var.azure_subscription_id}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_k3d_cluster_name}"
+  arc_k3d_cluster_id   = "/subscriptions/${var.azureSubscriptionId}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters/${local.arc_k3d_cluster_name}"
 }
 
 resource "k3d_cluster" "traefik_demo" {
