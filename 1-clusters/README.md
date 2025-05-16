@@ -1,6 +1,4 @@
-# IaC Arc-enabled Kubernetes multi-cluster deployment using Terraform
-
-This module demonstrates how to deploy and Arc-enable both AKS and k3d clusters using Terraform. The deployment includes:
+This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters using Terraform. The deployment includes:
 
 - **AKS Cluster**:
   - Single node pool with configurable VM size
@@ -12,15 +10,21 @@ This module demonstrates how to deploy and Arc-enable both AKS and k3d clusters 
   - Exposed ports for ingress (8000, 8443, 8080)
   - Azure Arc extension installation
 
-> **Note:** Please refer to the [README](../README.md) for a list of requirements.
+> **Note:** Please refer to the [README](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/README.md) for a list of requirements.
 
 ## Configuration
 
 The deployment can be customized through the following variables in `terraform.tfvars`:
 
-- `enable_aks`: Enable/disable AKS cluster deployment
-- `enable_k3d`: Enable/disable k3d cluster deployment
-- `aks_cluster_machine_type`: VM size for AKS nodes
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| `enable_aks` | Enable AKS cluster | bool | true | no |
+| `enable_k3d` | Enable k3d cluster | bool | true | no |
+| `azure_subscription_id` | Azure subscription ID to use for the deployment | string | "" | yes |
+| `azure_location` | Azure location to use for the deployment | string | "eastus" | no |
+| `aks_version` | AKS version to use for the deployment | string | "1.32.2" | no |
+| `aks_cluster_machine_type` | AKS cluster machine type | string | "Standard_DS2_v2" | no |
+| `aks_cluster_node_count` | AKS cluster node count | number | 2 | no |
 
 ## Deployment
 Install AKS and k3d clusters using Terraform:
@@ -29,7 +33,7 @@ Install AKS and k3d clusters using Terraform:
   terraform apply -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
   ```
 
-## Verify
+## Testing
 Verify that both AKS and k3d have been created successfully, and are accessible using `kubectl`:
 
   For AKS cluster:
@@ -42,22 +46,8 @@ Verify that both AKS and k3d have been created successfully, and are accessible 
   kubectl --context=$(terraform output -raw k3d_cluster_name) get nodes
   ```
 
-## How to connect your clusters to Azure Arc with Terraform
-
-Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](../aks.tf) and [k3d](../k3d.tf)
-
-```hcl
-resource "null_resource" "arc_k3d_cluster" {
-  provisioner "local-exec" {
-    command = <<EOT
-      az connectedk8s connect \
-        --kube-context k3d-traefik-demo \
-        --name ${local.arc_k3d_cluster_name} \
-        --resource-group ${azurerm_resource_group.traefik_demo.name}
-    EOT
-  }
-}
-```
-
-------
-:house: [HOME](../README.md) | [Traefik](../2-traefik/README.md) :arrow_forward:
+## Teardown
+Remove AKS and k3d clusters using Terraform:
+  ```shell
+  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
+  ```

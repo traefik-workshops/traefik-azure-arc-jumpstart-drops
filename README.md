@@ -34,8 +34,6 @@ The deployment is split into four main components:
 
 * [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
-* [Install Helm 3](https://helm.sh/docs/intro/install/)
-
 * Create Azure service principal (SP)
 
   The Azure service principal assigned with the "Contributor" role is required to complete the scenario and its related automation. To create it, log in to your Azure account run the below command (you could also do this in [Azure Cloud Shell](https://shell.azure.com/)).
