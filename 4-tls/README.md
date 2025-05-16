@@ -8,10 +8,9 @@ This drop demonstrates how to enable automatic HTTPS for your services using Tra
 
 The deployment configures Traefik with:
 
-- **Automatic Certificate Management**: Using Let's Encrypt
+- **Automatic Certificate Management**: Using Let's Encrypt to automatically generate and renew certificates
 - **HTTP Challenge**: For domain ownership verification
 - **Wildcard Domains**: Using sslip.io for easy testing
-- **Zero-touch Configuration**: Automatic certificate generation and renewal
 
 ### Important Notes
 
@@ -132,4 +131,10 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
   Tickets service:
   ```shell
   curl https://tickets.traefik-airlines.$(terraform output -raw aks_traefik_ip).sslip.io
+  ```
+
+## Teardown
+
+  ```shell
+  terraform destroy -var="azure_subscription_id=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
   ```
