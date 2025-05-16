@@ -12,20 +12,6 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
 
 > **Note:** Please refer to the [README](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/README.md) for a list of requirements.
 
-## Configuration
-
-The deployment can be customized through the following variables in `terraform.tfvars`:
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| `enable_aks` | Enable AKS cluster | bool | true | no |
-| `enable_k3d` | Enable k3d cluster | bool | true | no |
-| `azure_subscription_id` | Azure subscription ID to use for the deployment | string | "" | yes |
-| `azure_location` | Azure location to use for the deployment | string | "eastus" | no |
-| `aks_version` | AKS version to use for the deployment | string | "1.32.2" | no |
-| `aks_cluster_machine_type` | AKS cluster machine type | string | "Standard_DS2_v2" | no |
-| `aks_cluster_node_count` | AKS cluster node count | number | 2 | no |
-
 ## Deployment
 Install AKS and k3d clusters using Terraform:
   ```shell
