@@ -115,15 +115,18 @@ Install Traefik Airlines k8s application
 
 Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose either of the clusters to test against.
 
-  k3d url:
+### k3d
+
   ```shell
   url="localhost:8000"
   ```
 
-  AKS url:
+### AKS
+
   ```shell
   url=$(terraform output -raw aks_traefik_ip)
   ```
+### Services
 
   Customers service:
   ```shell

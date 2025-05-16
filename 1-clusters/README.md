@@ -112,13 +112,14 @@ Install AKS and k3d clusters using Terraform:
 
 Verify that both AKS and k3d have been created successfully, and are accessible using `kubectl`:
 
+### AKS
 
-  For AKS cluster:
   ```shell
   kubectl --context=$(terraform output -raw aks_cluster_name) get nodes
   ```
 
-  For k3d cluster:
+### k3d
+
   ```shell
   kubectl --context=$(terraform output -raw k3d_cluster_name) get nodes
   ```
