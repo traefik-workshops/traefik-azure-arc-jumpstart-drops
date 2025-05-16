@@ -63,6 +63,3 @@ The deployment can be customized through the following variables in `terraform.t
   ```shell
   curl http://$url -H "Host: tickets.traefik-airlines"
   ```
-
-------
-:arrow_backward: [Traefik](../2-traefik/README.md) | :house: [HOME](../README.md) | [TLS](../4-tls/README.md) :arrow_forward:
