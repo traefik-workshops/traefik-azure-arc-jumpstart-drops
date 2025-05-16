@@ -2,7 +2,7 @@
 
 ## Overview
 
-This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled Kubernetes clusters using Terraform and ARM templates.
+This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled Kubernetes clusters using Terraform and ARM templates. 
 
 ## Prerequisites
 
@@ -105,9 +105,7 @@ Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
   az connectedk8s show --name traefik-arc-k3d-demo --resource-group $(terraform output -raw resource_group_name)
   ```
 
-You can now view your Traefik dashboard locally.
-
-[http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
+You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
 
 ## ARM Template Example
 
