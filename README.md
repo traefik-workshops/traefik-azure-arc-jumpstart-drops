@@ -97,7 +97,13 @@ The deployment is split into four main components:
   az extension update --name k8s-configuration
   ```
 
-## Deployment
+* Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
+
+  ```shell
+  az term accept --publisher containous --product traefik-on-arc --plan traefik-byol
+  ```
+
+## Getting Started
 
 You can deploy the entire stack using the following command or deploy and test each component sequentially.
 
