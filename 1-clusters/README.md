@@ -126,7 +126,7 @@ Verify that both AKS and k3d have been created successfully, and are accessible 
 
 ## Arc-enable AKS and k3d clusters
 
-Connecting Kuberenets clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf) and [k3d](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/k3d.tf)
+Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf) and [k3d](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/k3d.tf)
 
   ```hcl
   resource "null_resource" "arc_k3d_cluster" {

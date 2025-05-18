@@ -155,7 +155,7 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
   ```
 
 ## Use FluxCD to deploy Traefik Airlines
-Azure Arc Kubernetes' recommedned GitOps tool is FluxCD. FluxCD is used to deploy the Traefik Airlines application to the AKS cluster using Terraform in the follow code snippet.
+Azure Arc Kubernetes' recommended GitOps tool is FluxCD. FluxCD is used to deploy the Traefik Airlines application to the AKS cluster using Terraform in the follow code snippet.
 
   ```hcl
   resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
