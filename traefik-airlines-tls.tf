@@ -1,5 +1,5 @@
 locals {
-  aks_traefik_ip = var.enable_aks ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
+  aks_traefik_ip = var.enable_aks && var.enable_traefik ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
 }
 
 resource "kubernetes_ingress_v1" "customers" {

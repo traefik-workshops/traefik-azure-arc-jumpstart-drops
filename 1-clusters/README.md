@@ -91,6 +91,12 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
   az extension update --name k8s-configuration
   ```
 
+* Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
+
+  ```shell
+  az term accept --publisher containous --product traefik-on-arc --plan traefik-byol
+  ```
+
 ## Getting Started
 
 Clone the Traefik Azure Arc Jumpstart GitHub repository:
