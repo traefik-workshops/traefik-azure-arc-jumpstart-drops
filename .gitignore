@@ -1,2 +1,5 @@
 .terraform*
 *.tfstate*
+
+/eks.tf
+/gke.tf

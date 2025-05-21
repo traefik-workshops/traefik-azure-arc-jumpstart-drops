@@ -49,7 +49,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
                     }
                 }
             },
-            "scope": "Microsoft.Kubernetes/connectedClusters/${"aks" == each.value ? local.arc_aks_cluster_name : local.arc_k3d_cluster_name}",
+            "scope": "Microsoft.Kubernetes/connectedClusters/arc-${each.value}-traefik-demo",
             "type": "Microsoft.KubernetesConfiguration/extensions"
         }
     ]
