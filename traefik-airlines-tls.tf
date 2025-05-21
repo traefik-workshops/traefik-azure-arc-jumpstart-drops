@@ -1,5 +1,5 @@
 locals {
-  aks_traefik_ip = "" //var.enable_aks && var.enable_traefik ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
+  aks_traefik_ip = "" //var.enableAKS && var.enableTraefik ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
 }
 
 resource "kubernetes_ingress_v1" "customers" {
@@ -31,7 +31,7 @@ resource "kubernetes_ingress_v1" "customers" {
     }
   }
 
-  count = var.enable_aks && var.enable_traefik_airlines_tls ? 1 : 0
+  count = var.enableAKS && var.enableTraefikAirlinesTLS ? 1 : 0
   depends_on = [ azurerm_arc_kubernetes_flux_configuration.traefik_airlines ]
 }
 
@@ -64,7 +64,7 @@ resource "kubernetes_ingress_v1" "employees" {
     }
   }
 
-  count = var.enable_aks && var.enable_traefik_airlines_tls ? 1 : 0
+  count = var.enableAKS && var.enableTraefikAirlinesTLS ? 1 : 0
   depends_on = [ azurerm_arc_kubernetes_flux_configuration.traefik_airlines ]
 }
 
@@ -97,7 +97,7 @@ resource "kubernetes_ingress_v1" "flights" {
     }
   }
 
-  count = var.enable_aks && var.enable_traefik_airlines_tls ? 1 : 0
+  count = var.enableAKS && var.enableTraefikAirlinesTLS ? 1 : 0
   depends_on = [ azurerm_arc_kubernetes_flux_configuration.traefik_airlines ]
 }
 
@@ -130,6 +130,6 @@ resource "kubernetes_ingress_v1" "tickets" {
     }
   }
 
-  count = var.enable_aks && var.enable_traefik_airlines_tls ? 1 : 0
+  count = var.enableAKS && var.enableTraefikAirlinesTLS ? 1 : 0
   depends_on = [ azurerm_arc_kubernetes_flux_configuration.traefik_airlines ]
 }

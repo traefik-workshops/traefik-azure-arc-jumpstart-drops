@@ -1,17 +1,27 @@
-# Deploy and Arc-enable AKS and k3d clusters with Terraform
+# Deploy Arc-enabled k3d, AKS, EKS, and GKE clusters with Terraform
 
 ## Overview
 
-This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters using Terraform. The deployment includes:
+This drop demonstrates how to deploy and Arc-enable k3d, AKS, EKS, and GKE clusters using Terraform. The deployment includes:
+
+- **k3d Cluster**:
+  - Local Kubernetes cluster using k3s in Docker
+  - Exposed ports for ingress (8000, 8443, 8080)
+  - Azure Arc extension installation
 
 - **AKS Cluster**:
   - Single node pool with configurable VM size
   - Exposed ports for ingress (80, 443, 8080)
   - Azure Arc extension installation
 
-- **k3d Cluster**:
-  - Local Kubernetes cluster using k3s in Docker
-  - Exposed ports for ingress (8000, 8443, 8080)
+- **EKS Cluster**:
+  - Single node pool with configurable VM size
+  - Exposed ports for ingress (80, 443, 8080)
+  - Azure Arc extension installation
+
+- **GKE Cluster**:
+  - Single node pool with configurable VM size
+  - Exposed ports for ingress (80, 443, 8080)
   - Azure Arc extension installation
 
 ## Prerequisites
@@ -23,6 +33,12 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
   ```
 
 * [Install k3d](https://k3d.io/stable/#installation)
+
+* [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+* [Optional] [Install and configure gcloud if you plan to deploy GKE](https://cloud.google.com/sdk/docs/install)
+
+* [Optional] [Install gke-cloud-auth-plugin if you plan to deploy GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
 
 * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
@@ -91,6 +107,13 @@ This drop demonstrates how to deploy and Arc-enable both AKS and k3d clusters us
   az extension update --name k8s-configuration
   ```
 
+* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory.
+
+```shell
+cp extensions/eks.tf .
+cp extensions/gke.tf .
+```
+
 * Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
 
   ```shell
@@ -105,34 +128,42 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository:
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install AKS and k3d clusters using Terraform:
+Install k3d and AKS clusters using Terraform:
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
-    -var-file="1-clusters/terraform.tfvars"
+    -var-file="1-clusters/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
+
+You can also enable the install of EKS and GKE clusters as well using Terraform:
+  ```shell
+  cd traefik-azure-arc-jumpstart-drops
+  terraform init
+  terraform apply \
+    -var-file="1-clusters/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
+  ```
+  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
-Verify that both AKS and k3d have been created successfully, and are accessible using `kubectl`:
-
-### AKS
-
-  ```shell
-  kubectl --context=$(terraform output -raw aksClusterName) get nodes
-  ```
-
-### k3d
+Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, and are accessible using `kubectl`:
 
   ```shell
   kubectl --context=$(terraform output -raw k3dClusterName) get nodes
+  kubectl --context=$(terraform output -raw aksClusterName) get nodes
+  kubectl --context=$(terraform output -raw eksClusterName) get nodes
+  kubectl --context=$(terraform output -raw gkeClusterName) get nodes
   ```
 
-## Arc-enable AKS and k3d clusters
+## Arc-enable clusters
 
-Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the setup for both clusters under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf) and [k3d](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/k3d.tf)
+Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup for the AKS cluster under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf).
 
   ```hcl
   resource "null_resource" "arc_k3d_cluster" {
@@ -149,6 +180,21 @@ Connecting Kubernetes clusters to Azure Arc is only possible through the Azure C
 
 ## Teardown
 
+To remove the Arc-enabled clusters, run the following commands:
+
   ```shell
-  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="1-clusters/terraform.tfvars"
+  terraform destroy \
+    -var-file="1-clusters/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+  ```
+
+If you enabled EKS and GKE clusters, run the following commands:
+
+  ```shell
+  terraform destroy \
+    -var-file="1-clusters/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
   ```

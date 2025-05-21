@@ -5,20 +5,20 @@ output "resourceGroupName" {
 
 output "k3dClusterName" {
   description = "k3d cluster name"
-  value = var.enable_k3d ? local.k3d_cluster_name : ""
+  value = var.enableK3D ? local.k3d_cluster_name : ""
 }
 
 output "aksClusterName" {
   description = "AKS cluster name"
-  value = var.enable_aks ? local.aks_cluster_name : ""
+  value = var.enableAKS ? local.aks_cluster_name : ""
 }
 
 output "eksClusterName" {
   description = "EKS cluster name"
-  value = var.enable_eks ? local.eks_cluster_name : ""
+  value = var.enableEKS ? local.eks_cluster_name : ""
 }
 
 output "gkeClusterName" {
   description = "GKE cluster name"
-  value = var.enable_gke ? local.gke_cluster_name : ""
+  value = var.enableGKE ? local.gke_cluster_name : ""
 }

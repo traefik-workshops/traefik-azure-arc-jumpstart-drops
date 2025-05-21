@@ -4,22 +4,31 @@ locals {
     "global.azure.enabled": true,
     "ingressClass.enabled": false,
     "ingressRoute.dashboard.enabled": "true",
-    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik`) || Host(`dashboard.traefik.localhost`)",
+    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.local`) || Host(`dashboard.traefik.localhost`)",
     "ports.traefik.expose.default": "true",
     "versionOverride": "v3.3.6"
   }
 
-  certificatesResolvers = var.enable_traefik_airlines_tls ? {
+  certificatesResolvers = var.enableTraefikAirlinesTLS ? {
     "certificatesResolvers.traefik-airlines.acme.email": "zaid@traefik.io",
     "certificatesResolvers.traefik-airlines.acme.storage": "/data/acme.json",
     "certificatesResolvers.traefik-airlines.acme.httpChallenge.entryPoint": "web"
   } : {}
 
   config = merge(local.traefik, local.certificatesResolvers)
+
+  clusterSettings = {
+    "k3d" = {}
+    "aks" = {}
+    "eks" = {
+      "service.annotations.service\\.beta\\.kubernetes\\.io\\/aws-load-balancer-type" = "nlb"
+    }
+    "gke" = {}
+  }
 }
 
 resource "azurerm_resource_group_template_deployment" "traefik" {
-  name                = "traefik"
+  name                = "traefik-${each.key}"
   resource_group_name = azurerm_resource_group.traefik_demo.name
   deployment_mode     = "Incremental"
   template_content = <<TEMPLATE
@@ -31,7 +40,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
     "resources": [
         {
             "apiVersion": "2023-05-01",
-            "name": "traefik",
+            "name": "traefik-${each.key}",
             "plan": {
                 "name": "traefik-byol",
                 "product": "traefik-on-arc",
@@ -40,7 +49,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "configurationProtectedSettings": {},
-                "configurationSettings": ${jsonencode(local.config)},
+                "configurationSettings": ${jsonencode(merge(local.config, local.clusterSettings[each.key]))},
                 "extensionType": "TraefikLabs.TraefikProxyOnArc",
                 "releaseTrain": "stable",
                 "scope": {
@@ -49,13 +58,13 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
                     }
                 }
             },
-            "scope": "Microsoft.Kubernetes/connectedClusters/arc-${each.value}-traefik-demo",
+            "scope": "Microsoft.Kubernetes/connectedClusters/arc-${each.key}-traefik-demo",
             "type": "Microsoft.KubernetesConfiguration/extensions"
         }
     ]
 }
 TEMPLATE
 
-  for_each   = var.enable_traefik ? toset(local.clusters) : []
+  for_each   = var.enableTraefik ? toset(local.clusters) : []
   depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster ]
 }

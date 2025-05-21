@@ -1,8 +1,10 @@
 locals {
-  k3d = var.enable_k3d ? ["k3d"] : []
-  aks = var.enable_aks ? ["aks"] : []
-  eks = var.enable_eks ? ["eks"] : []
-  gke = var.enable_gke ? ["gke"] : []
+  arc_cluster_prefix = "/subscriptions/${var.azureSubscriptionId}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters"
+
+  k3d = var.enableK3D ? ["k3d"] : []
+  aks = var.enableAKS ? ["aks"] : []
+  eks = var.enableEKS ? ["eks"] : []
+  gke = var.enableGKE ? ["gke"] : []
   clusters = toset(concat(local.k3d, local.aks, local.eks, local.gke))
 }
 
@@ -17,7 +19,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "traefik_demo" {
   name     = "traefik-demo"
-  location = var.azure_location
+  location = var.azureLocation
 }
 
 resource "azurerm_arc_kubernetes_cluster_extension" "flux" {
@@ -29,7 +31,7 @@ resource "azurerm_arc_kubernetes_cluster_extension" "flux" {
     type = "SystemAssigned"
   }
 
-  for_each = var.enable_traefik_airlines ? local.clusters : []
+  for_each = var.enableTraefikAirlines ? local.clusters : []
   depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster ]
 }
 
@@ -48,6 +50,6 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
     name = "traefik-airlines"
   }
 
-  for_each   = var.enable_traefik_airlines ? local.clusters : []
+  for_each   = var.enableTraefikAirlines ? local.clusters : []
   depends_on = [ azurerm_arc_kubernetes_cluster_extension.flux, azurerm_resource_group_template_deployment.traefik ]
 }

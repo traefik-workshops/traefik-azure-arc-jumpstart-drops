@@ -1,22 +1,27 @@
+locals {
+  eks_cluster_name = "eks-traefik-demo"
+}
+
 provider "aws" {
-  region = var.eks_cluster_location
+  region = var.eksClusterLocation
 }
 
 module "eks" {
   source = "git::https://github.com/traefik-workshops/terraform-demo-modules.git//clusters/eks?ref=main"
 
+  eks_version               = var.eksVersion
   cluster_name              = local.eks_cluster_name
-  cluster_location          = var.eks_cluster_location
-  cluster_node_machine_type = var.eks_cluster_machine_type
-  cluster_node_count        = var.eks_cluster_node_count
+  cluster_location          = var.eksClusterLocation
+  cluster_node_machine_type = var.eksClusterMachineType
+  cluster_node_count        = var.eksClusterNodeCount
 
-  count = var.enable_eks ? 1 : 0
+  count = var.enableEKS ? 1 : 0
 }
 
 resource "null_resource" "arc_eks_cluster" {
   provisioner "local-exec" {
     command = <<EOT
-      aws eks --region "${var.eks_cluster_location}" update-kubeconfig \
+      aws eks --region "${var.eksClusterLocation}" update-kubeconfig \
         --name "${local.eks_cluster_name}" \
         --alias "${local.eks_cluster_name}"
       
@@ -27,6 +32,6 @@ resource "null_resource" "arc_eks_cluster" {
     EOT
   }
 
-  count      = var.enable_eks ? 1 : 0
+  count      = var.enableEKS ? 1 : 0
   depends_on = [ module.eks ]
 }

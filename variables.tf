@@ -1,16 +1,16 @@
-variable "enable_traefik" {
+variable "enableTraefik" {
   type        = bool
   description = "Enable Traefik"
   default     = true
 }
 
-variable "enable_traefik_airlines" {
+variable "enableTraefikAirlines" {
   type        = bool
   description = "Enable Traefik Airlines"
   default     = true
 }
 
-variable "enable_traefik_airlines_tls" {
+variable "enableTraefikAirlinesTLS" {
   type        = bool
   description = "Enable Traefik Airlines TLS"
   default     = true
@@ -23,114 +23,114 @@ variable "azureSubscriptionId" {
   sensitive   = true
 }
 
-variable "azure_location" {
+variable "azureLocation" {
   type        = string
   description = "Azure location to use for the deployment"
   default     = "westus"
 }
 
-variable "enable_k3d" {
+variable "enableK3D" {
   type        = bool
   description = "Enable k3d cluster"
   default     = true
 }
 
-variable "enable_aks" {
+variable "enableAKS" {
   type        = bool
   description = "Enable AKS cluster"
   default     = true
 }
 
-variable "aks_version" {
+variable "aksVersion" {
   type        = string
   description = "AKS version to use for the deployment"
   default     = "1.32.2"
 }
 
-variable "aks_cluster_location" {
+variable "aksClusterLocation" {
   type        = string
   description = "AKS cluster location to use for the deployment"
   default     = "westus"
 }
 
-variable "aks_cluster_machine_type" {
+variable "aksClusterMachineType" {
   type        = string
   description = "Machine type to use for the deployment"
   default     = "Standard_DS2_v2"
 }
 
-variable "aks_cluster_node_count" {
+variable "aksClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
   default     = 1
 }
 
-variable "enable_eks" {
+variable "enableEKS" {
   type        = bool
   description = "Enable EKS cluster"
-  default     = true
+  default     = false
 }
 
-variable "eks_version" {
+variable "eksVersion" {
   type        = string
   description = "EKS version to use for the deployment"
   default     = ""
 }
 
-variable "eks_cluster_location" {
+variable "eksClusterLocation" {
   type        = string
   description = "EKS cluster location to use for the deployment"
   default     = "us-west-1"
 }
 
-variable "eks_cluster_machine_type" {
+variable "eksClusterMachineType" {
   type        = string
   description = "Machine type to use for the deployment"
   default     = "m6a.large"
 }
 
-variable "eks_cluster_node_count" {
+variable "eksClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
   default     = 1
 }
 
-variable "enable_gke" {
+variable "enableGKE" {
   type        = bool
   description = "Enable GKE cluster"
-  default     = true
+  default     = false
 }
 
-variable "google_project_id" {
+variable "googleProjectId" {
   type        = string
   description = "Google project ID to use for the deployment"
   default     = ""
 
   validation {
-    condition     = !(var.enable_gke && var.google_project_id == "")
+    condition     = !(var.enableGKE && var.googleProjectId == "")
     error_message = "Google project ID is required when GKE is enabled"
   }
 }
 
-variable "gke_version" {
+variable "gkeVersion" {
   type        = string
   description = "GKE version to use for the deployment"
   default     = ""
 }
 
-variable "gke_cluster_location" {
+variable "gkeClusterLocation" {
   type        = string
   description = "GKE cluster location to use for the deployment"
   default     = "us-west3"
 }
 
-variable "gke_cluster_machine_type" {
+variable "gkeClusterMachineType" {
   type        = string
   description = "Machine type to use for the deployment"
   default     = "c4-standard-2"
 }
 
-variable "gke_cluster_node_count" {
+variable "gkeClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
   default     = 1

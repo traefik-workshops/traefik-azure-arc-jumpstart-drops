@@ -29,6 +29,12 @@ The Traefik Airlines demo application consists of four microservices:
 
 * [Install k3d](https://k3d.io/stable/#installation)
 
+* [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+* [Optional] [Install and configure gcloud if you plan to deploy GKE](https://cloud.google.com/sdk/docs/install)
+
+* [Optional] [Install gke-cloud-auth-plugin if you plan to deploy GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
+
 * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
 * [Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
@@ -95,6 +101,13 @@ The Traefik Airlines demo application consists of four microservices:
   az extension update --name connectedk8s
   az extension update --name k8s-configuration
   ```
+
+* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory.
+
+```shell
+cp extensions/eks.tf .
+cp extensions/gke.tf .
+```
 
 * Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
 

@@ -1,5 +1,5 @@
-enable_aks                  = true
-enable_k3d                  = true
-enable_traefik              = true
-enable_traefik_airlines     = true
-enable_traefik_airlines_tls = true
+enableK3D                = true
+enableAKS                = true
+enableTraefik            = true
+enableTraefikAirlines    = true
+enableTraefikAirlinesTLS = true
