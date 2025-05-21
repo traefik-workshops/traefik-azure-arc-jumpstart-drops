@@ -23,3 +23,11 @@ resource "null_resource" "arc_k3d_cluster" {
   count      = var.enableK3D ? 1 : 0
   depends_on = [ module.k3d ]
 }
+
+provider "kubernetes" {
+  alias                  = "k3d"
+  host                   = module.k3d.0.host
+  client_certificate     = module.k3d.0.client_certificate
+  client_key             = module.k3d.0.client_key
+  cluster_ca_certificate = module.k3d.0.cluster_ca_certificate
+}

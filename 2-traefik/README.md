@@ -102,6 +102,12 @@ cp extensions/gke.tf .
 
 ## Getting Started
 
+  > **Note:** You must accept the terms for Traefik for Azure Arc before you can deploy it to your Arc-enabled Kubernetes clusters. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
+
+    ```shell
+    az term accept --publisher containous --product traefik-on-arc --plan traefik-byol
+    ```
+
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
@@ -129,7 +135,6 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
     -var="enableEKS=true"
   ```
   > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
-
 
 ## Testing
 

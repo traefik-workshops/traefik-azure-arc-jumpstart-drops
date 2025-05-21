@@ -2,10 +2,9 @@ locals {
   traefik = {
     "deployment.replicas": "1",
     "global.azure.enabled": true,
-    "ingressClass.enabled": false,
-    "ingressRoute.dashboard.enabled": "true",
-    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.local`) || Host(`dashboard.traefik.localhost`)",
-    "ports.traefik.expose.default": "true",
+    "ingressClass.enabled": true,
+    "ingressRoute.dashboard.enabled": true,
+    "ports.traefik.expose.default": true,
     "versionOverride": "v3.3.6"
   }
 
@@ -18,12 +17,19 @@ locals {
   config = merge(local.traefik, local.certificatesResolvers)
 
   clusterSettings = {
-    "k3d" = {}
-    "aks" = {}
+    "k3d" = {
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
+    }
+    "aks" = {
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.aks`)"
+    }
     "eks" = {
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.eks`)"
       "service.annotations.service\\.beta\\.kubernetes\\.io\\/aws-load-balancer-type" = "nlb"
     }
-    "gke" = {}
+    "gke" = {
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.gke`)"
+    }
   }
 }
 

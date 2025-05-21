@@ -34,23 +34,26 @@ resource "null_resource" "arc_aks_cluster" {
   depends_on = [ module.aks ]
 }
 
-# provider "kubernetes" {
-#   host                   = module.aks.0.host
-#   client_certificate     = module.aks.0.client_certificate
-#   client_key             = module.aks.0.client_key
-#   cluster_ca_certificate = module.aks.0.cluster_ca_certificate
-# }
+provider "kubernetes" {
+  alias                  = "aks"
+  host                   = module.aks.0.host
+  client_certificate     = module.aks.0.client_certificate
+  client_key             = module.aks.0.client_key
+  cluster_ca_certificate = module.aks.0.cluster_ca_certificate
+}
 
-# data "kubernetes_service" "traefik" {
-#   metadata {
-#     name      = "traefik"
-#     namespace = "traefik"
-#   }
+data "kubernetes_service" "traefik_aks" {
+  provider = kubernetes.aks
 
-#   count = var.enableAKS && var.enableTraefik ? 1 : 0
-#   depends_on = [ module.aks, azurerm_resource_group_template_deployment.traefik ]
-# }
+  metadata {
+    name      = "traefik-aks"
+    namespace = "traefik"
+  }
 
-# output "aksTraefikIp" {
-#   value = var.enableAKS && var.enableTraefik ? data.kubernetes_service.traefik.0.status.0.load_balancer.0.ingress.0.ip : ""
-# }
+  count      = var.enableAKS && var.enableTraefik ? 1 : 0
+  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
+}
+
+output "traefikAKSAddress" {
+  value = var.enableAKS && var.enableTraefik ? data.kubernetes_service.traefik_aks.0.status.0.load_balancer.0.ingress.0.ip : ""
+}

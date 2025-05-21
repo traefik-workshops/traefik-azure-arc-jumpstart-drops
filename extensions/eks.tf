@@ -35,3 +35,26 @@ resource "null_resource" "arc_eks_cluster" {
   count      = var.enableEKS ? 1 : 0
   depends_on = [ module.eks ]
 }
+
+provider "kubernetes" {
+  alias                  = "eks"
+  host                   = module.eks.0.cluster_endpoint
+  cluster_ca_certificate = module.eks.0.cluster_ca_certificate
+  token                  = module.eks.0.token
+}
+
+data "kubernetes_service" "traefik_eks" {
+  provider = kubernetes.eks
+
+  metadata {
+    name      = "traefik-eks"
+    namespace = "traefik"
+  }
+
+  count      = var.enableEKS && var.enableTraefik ? 1 : 0
+  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
+}
+
+output "traefikEKSAddress" {
+  value = var.enableEKS && var.enableTraefik ? data.kubernetes_service.traefik_eks.0.status.0.load_balancer.0.ingress.0.hostname : ""
+}
