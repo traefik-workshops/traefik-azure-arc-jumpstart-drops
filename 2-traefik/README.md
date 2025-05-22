@@ -12,7 +12,7 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
   az --version
   ```
 
-* [Install k3d](https://k3d.io/stable/#installation)
+* [Optional] [Install k3d](https://k3d.io/stable/#installation)
 
 * [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
@@ -148,6 +148,36 @@ Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
   ```
 
 You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
+
+If you would like to view the Traefik dashboard on the rest Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
+
+  ```shell
+  sudo ./update_hosts.sh
+  ```
+
+Example output to `/etc/hosts` file:
+
+  ```shell
+  # Traefik dashboard entries - auto-generated from kubectl outputs
+  20.253.255.25		dashboard.traefik.aks
+  54.219.221.253		dashboard.traefik.eks
+  34.106.34.172		dashboard.traefik.gke
+  ```
+
+Example output of `sudo ./update_hosts.sh`:
+
+  ```shell
+  # Traefik dashboard entries - auto-generated from kubectl outputs
+  20.253.255.25		dashboard.traefik.aks
+  54.219.221.253		dashboard.traefik.eks
+  34.106.34.172		dashboard.traefik.gke
+  ```
+
+You can now view your Traefik dashboard on the rest Arc-enabled Kubernetes clusters at:
+
+[http://dashboard.traefik.aks:8080](http://dashboard.traefik.aks:8080)
+[http://dashboard.traefik.eks:8080](http://dashboard.traefik.eks:8080)
+[http://dashboard.traefik.gke:8080](http://dashboard.traefik.gke:8080)
 
 ## ARM Template Example
 

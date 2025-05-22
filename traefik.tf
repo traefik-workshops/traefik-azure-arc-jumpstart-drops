@@ -37,7 +37,7 @@ locals {
 resource "azurerm_resource_group_template_deployment" "traefik" {
   name                = "traefik-${each.key}"
   resource_group_name = azurerm_resource_group.traefik_demo.name
-  deployment_mode     = "Incremental"
+  deployment_mode     = "Complete"
   template_content = <<TEMPLATE
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
@@ -76,18 +76,18 @@ TEMPLATE
   depends_on = [null_resource.arc_clusters]
 }
 
-resource "null_resource" "azurerm_resource_group_template_deployment_destroy" {
-  provisioner "local-exec" {
-    when = destroy
-    command = <<EOT
-      az k8s-extension delete --yes \
-        --name "traefik-${each.key}" \
-        --cluster-name "arc-${each.key}-traefik-demo" \
-        --resource-group "traefik-demo" \
-        --cluster-type connectedClusters
-    EOT
-  }
+# resource "null_resource" "azurerm_resource_group_template_deployment_destroy" {
+#   provisioner "local-exec" {
+#     when = destroy
+#     command = <<EOT
+#       az k8s-extension delete --yes \
+#         --name "traefik-${each.key}" \
+#         --cluster-name "arc-${each.key}-traefik-demo" \
+#         --resource-group "traefik-demo" \
+#         --cluster-type connectedClusters
+#     EOT
+#   }
 
-  for_each   = var.enableTraefik ? toset(local.clusters) : []
-  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
-}
+#   for_each   = var.enableTraefik ? toset(local.clusters) : []
+#   depends_on = [ azurerm_resource_group_template_deployment.traefik ]
+# }

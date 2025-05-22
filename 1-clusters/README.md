@@ -32,7 +32,7 @@ This drop demonstrates how to deploy and Arc-enable k3d, AKS, EKS, and GKE clust
   az --version
   ```
 
-* [Install k3d](https://k3d.io/stable/#installation)
+* [Optional] [Install k3d](https://k3d.io/stable/#installation)
 
 * [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
@@ -163,18 +163,32 @@ Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, 
 
 ## Arc-enable clusters
 
-Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup for the AKS cluster under [AKS](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/aks.tf).
+Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup under [clusters.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/clusters.tf).
 
   ```hcl
   resource "null_resource" "arc_k3d_cluster" {
     provisioner "local-exec" {
       command = <<EOT
         az connectedk8s connect \
-          --kube-context k3d-traefik-demo \
-          --name ${local.arc_k3d_cluster_name} \
-          --resource-group ${azurerm_resource_group.traefik_demo.name}
+          --kube-context ${local.k3d_cluster_name} \
+          --name "arc-${local.k3d_cluster_name}" \
+          --resource-group "traefik-demo"
       EOT
     }
+
+    provisioner "local-exec" {
+      when = destroy
+      command = <<EOT
+        az connectedk8s delete --force --yes \
+          --name "arc-k3d-traefik-demo" \
+          --resource-group "traefik-demo"
+
+        kubectl config delete-context "k3d-traefik-demo" 2>/dev/null || true
+      EOT
+    }
+
+    count      = var.enableK3D ? 1 : 0
+    depends_on = [ module.k3d ]
   }
   ```
 

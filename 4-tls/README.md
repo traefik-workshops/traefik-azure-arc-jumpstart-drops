@@ -26,7 +26,7 @@ The deployment configures Traefik with:
   az --version
   ```
 
-* [Install k3d](https://k3d.io/stable/#installation)
+* [Optional] [Install k3d](https://k3d.io/stable/#installation)
 
 * [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
