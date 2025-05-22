@@ -62,7 +62,7 @@ variable "aksClusterMachineType" {
 variable "aksClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
-  default     = 1
+  default     = 2
 }
 
 variable "enableEKS" {
@@ -92,7 +92,7 @@ variable "eksClusterMachineType" {
 variable "eksClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
-  default     = 1
+  default     = 2
 }
 
 variable "enableGKE" {

@@ -32,11 +32,11 @@ resource "azurerm_arc_kubernetes_cluster_extension" "flux" {
   }
 
   for_each = var.enableTraefikAirlines ? local.clusters : []
-  depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster ]
+  depends_on = [null_resource.arc_clusters]
 }
 
 resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
-  name       = "traefik-airlines"
+  name       = "traefik-airline-${each.value}"
   cluster_id = "${local.arc_cluster_prefix}/arc-${each.value}-traefik-demo"
   namespace  = "traefik-airlines"
 

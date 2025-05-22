@@ -1,11 +1,12 @@
 locals {
   traefik = {
     "deployment.replicas": "1",
-    "global.azure.enabled": true,
-    "ingressClass.enabled": true,
-    "ingressRoute.dashboard.enabled": true,
-    "ports.traefik.expose.default": true,
-    "versionOverride": "v3.3.6"
+    "global.azure.enabled": "true",
+    "ingressClass.enabled": "true",
+    "kubernetesCRD.enabled": "true",
+    "ingressRoute.dashboard.enabled": "true",
+    "ports.traefik.expose.default": "true",
+    "rbac.enabled": "true"
   }
 
   certificatesResolvers = var.enableTraefikAirlinesTLS ? {
@@ -72,5 +73,21 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
 TEMPLATE
 
   for_each   = var.enableTraefik ? toset(local.clusters) : []
-  depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster ]
+  depends_on = [null_resource.arc_clusters]
+}
+
+resource "null_resource" "azurerm_resource_group_template_deployment_destroy" {
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      az k8s-extension delete --yes \
+        --name "traefik-${each.key}" \
+        --cluster-name "arc-${each.key}-traefik-demo" \
+        --resource-group "traefik-demo" \
+        --cluster-type connectedClusters
+    EOT
+  }
+
+  for_each   = var.enableTraefik ? toset(local.clusters) : []
+  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
 }

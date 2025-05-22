@@ -1,5 +1,5 @@
 .terraform*
 *.tfstate*
 
-/eks.tf
-/gke.tf
+/aws.tf
+/google.tf
