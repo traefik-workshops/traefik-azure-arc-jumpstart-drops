@@ -36,7 +36,7 @@ resource "azurerm_arc_kubernetes_cluster_extension" "flux" {
 }
 
 resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
-  name       = "traefik-airline-${each.value}"
+  name       = "traefik-airlines-${each.value}"
   cluster_id = "${local.arc_cluster_prefix}/arc-${each.value}-traefik-demo"
   namespace  = "traefik-airlines"
 
@@ -52,4 +52,19 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
 
   for_each   = var.enableTraefikAirlines ? local.clusters : []
   depends_on = [ azurerm_arc_kubernetes_cluster_extension.flux, azurerm_resource_group_template_deployment.traefik ]
+}
+
+// Clean up Traefik Airlines resources on deletion
+resource "null_resource" "azurerm_arc_kubernetes_flux_configuration_traefik_airlines_destroy" {
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      kubectl delete namespace traefik-airlines \
+        --context "${each.key}-traefik-demo" \
+        --ignore-not-found=true
+    EOT
+  }
+
+  for_each   = var.enableTraefikAirlines ? toset(local.clusters) : []
+  depends_on = [ azurerm_arc_kubernetes_flux_configuration.traefik_airlines ]
 }

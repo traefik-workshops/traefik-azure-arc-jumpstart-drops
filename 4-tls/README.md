@@ -14,8 +14,7 @@ The deployment configures Traefik with:
 
 ### Important Notes
 
-- Only the AKS cluster supports Let's Encrypt integration as it requires a public IP
-- k3d cluster will not be able to complete the ACME challenge due to lack of public IP
+- AKS/EKS/GKE clusters support Let's Encrypt integration but k3d does not as it requires a public IP
 - Certificates are automatically stored and renewed by Traefik
 
 ## Prerequisites
@@ -122,38 +121,141 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install Traefik Airlines k8s application
+Update Traefik configuration to handle Let's Encrypt certificates:
+
   ```shell
+  cd traefik-azure-arc-jumpstart-drops
   terraform init
-  terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
+  terraform apply \
+    -var-file="4-tls/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+  ```
+
+You can also enable the install on EKS and GKE clusters as well using Terraform:
+
+  ```shell
+  cd traefik-azure-arc-jumpstart-drops
+  terraform init
+  terraform apply \
+    -var-file="4-tls/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
+  ```
+  > **Note:** Make sure to copy the `extensions/aws.tf` and `extensions/google.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
+
+Deploy TLS enabled routes to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-tls.sh` script to deploy the TLS enabled routes to all clusters.
+
+### AKS
+
+  ```shell
+  aks_ip="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  sed "s/EXTERNAL_IP/$aks_ip/g" "4-tls/resources/traefik-airlines-tls.yaml" | \
+  kubectl apply \
+    --namespace "traefik-airlines" \
+    --context "aks-traefik-demo" -f -;
+  ```
+
+### AKS/EKS/GKE
+
+  ```shell
+  ./deploy-tls.sh
+  ```
+
+  Example output:
+
+  ```shell
+  Processing aks...
+  Deploying TLS resources to aks-traefik-demo with IP/hostname: 20.245.254.148
+  Deploying with IP 20.245.254.148
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  Processing eks...
+  Deploying TLS resources to eks-traefik-demo with IP/hostname: a2f9aea9f80644d1fbfdd69a2f8e19e1-67ea3e06c2d7552c.elb.us-west-1.amazonaws.com
+  Resolving EKS hostname to IP...
+  Deploying with IP 184.169.136.137 (0)
+  ingressroute.traefik.io/customers-ingress-secure-0 created
+  ingressroute.traefik.io/employees-ingress-secure-0 created
+  ingressroute.traefik.io/flights-ingress-secure-0 created
+  ingressroute.traefik.io/tickets-ingress-secure-0 created
+  Deploying with IP 52.8.123.158 (1)
+  ingressroute.traefik.io/customers-ingress-secure-1 created
+  ingressroute.traefik.io/employees-ingress-secure-1 created
+  ingressroute.traefik.io/flights-ingress-secure-1 created
+  ingressroute.traefik.io/tickets-ingress-secure-1 created
+  Processing gke...
+  Deploying TLS resources to gke-traefik-demo with IP/hostname: 34.106.133.173
+  Deploying with IP 34.106.133.173
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  TLS resources deployment completed.
   ```
 
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the AKS cluster. k3d cluster will not be able to support the acme challenge because it does not have a public IP.
+Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
 
-  Customers service:
+### AKS/GKE
+
   ```shell
-  curl https://customers.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
+  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
   ```
 
-  Employees service:
+### EKS
+
   ```shell
-  curl https://employees.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
+  eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
+  eks_address_0=$(echo $eks_ips | sed -n 1p)
+  eks_address_1=$(echo $eks_ips | sed -n 2p)
+
   ```
 
-  Flights service:
+### Customers service
+
   ```shell
-  curl https://flights.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
+  curl https://customers.traefik-airlines.${aks_address}.sslip.io
   ```
 
-  Tickets service:
+### Employees service
+
   ```shell
-  curl https://tickets.traefik-airlines.$(terraform output -raw aksTraefikIp).sslip.io
+  curl https://employees.traefik-airlines.${gke_address}.sslip.io
+  ```
+
+### Flights service
+
+  ```shell
+  curl https://flights.traefik-airlines.${eks_address_0}.sslip.io
+  ```
+
+### Tickets service
+
+  ```shell
+  curl https://tickets.traefik-airlines.${eks_address_0}.sslip.io
   ```
 
 ## Teardown
 
+To remove the Arc-enabled clusters, run the following commands:
+
   ```shell
-  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="4-tls/terraform.tfvars"
+  terraform destroy \
+    -var-file="4-tls/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
+
+If you enabled EKS and GKE clusters, run the following commands:
+
+  ```shell
+  terraform destroy \
+    -var-file="4-tls/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"

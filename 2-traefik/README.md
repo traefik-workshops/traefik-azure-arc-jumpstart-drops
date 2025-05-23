@@ -114,7 +114,8 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
+Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform:
+
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
@@ -124,6 +125,7 @@ Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_M
   ```
 
 You can also enable the install on EKS and GKE clusters as well using Terraform:
+
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
@@ -159,18 +161,20 @@ Example output to `/etc/hosts` file:
 
   ```shell
   # Traefik dashboard entries - auto-generated from kubectl outputs
-  20.253.255.25		dashboard.traefik.aks
+  20.253.255.25		  dashboard.traefik.aks
   54.219.221.253		dashboard.traefik.eks
-  34.106.34.172		dashboard.traefik.gke
+  34.106.34.172		  dashboard.traefik.gke
   ```
 
 Example output of `sudo ./update_hosts.sh`:
 
   ```shell
-  # Traefik dashboard entries - auto-generated from kubectl outputs
-  20.253.255.25		dashboard.traefik.aks
-  54.219.221.253		dashboard.traefik.eks
-  34.106.34.172		dashboard.traefik.gke
+  Successfully updated /etc/hosts with available Traefik endpoints
+
+  Current Traefik endpoints:
+  - AKS: http://dashboard.traefik.aks:8080
+  - EKS: http://dashboard.traefik.eks:8080
+  - GKE: http://dashboard.traefik.gke:8080
   ```
 
 You can now view your Traefik dashboard on the rest Arc-enabled Kubernetes clusters at:
@@ -230,7 +234,7 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="2-traefik/terraform.tfvars" \
+    -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
@@ -238,7 +242,7 @@ If you enabled EKS and GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="2-traefik/terraform.tfvars" \
+    -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableGKE=true" \

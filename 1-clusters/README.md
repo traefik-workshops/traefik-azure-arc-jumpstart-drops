@@ -129,6 +129,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository:
   ```
 
 Install k3d and AKS clusters using Terraform:
+
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
@@ -138,6 +139,7 @@ Install k3d and AKS clusters using Terraform:
   ```
 
 You can also enable the install of EKS and GKE clusters as well using Terraform:
+
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
