@@ -19,7 +19,7 @@ resource "null_resource" "arc_k3d_cluster" {
       az connectedk8s connect \
         --kube-context ${local.k3d_cluster_name} \
         --name "arc-${local.k3d_cluster_name}" \
-        --resource-group "traefik-demo"
+        --resource-group ${azurerm_resource_group.traefik_demo.name}
     EOT
   }
 
@@ -81,14 +81,26 @@ resource "null_resource" "arc_aks_cluster" {
   depends_on = [ module.aks ]
 }
 
-module "eks" {
-  source = "git::https://github.com/traefik-workshops/terraform-demo-modules.git//clusters/eks?ref=main"
+resource "null_resource" "arc_eks_cluster_destroy" {
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      # Check if context exists, and keep checking until it doesn't
+      while kubectl config get-contexts "eks-traefik-demo" &>/dev/null; do
+        echo "Waiting for eks-traefik-demo context to be deleted..."
+        sleep 5
+      done
+      echo "eks-traefik-demo context has been deleted"
+    EOT
+  }
 
-  eks_version               = var.eksVersion
-  cluster_name              = local.eks_cluster_name
-  cluster_location          = var.eksClusterLocation
-  cluster_node_machine_type = var.eksClusterMachineType
-  cluster_node_count        = var.eksClusterNodeCount
+  count = var.enableEKS ? 1 : 0
+}
+
+module "k8s_connect_eks" {
+  source = "./modules/k8s-connect"
+
+  context_name = local.eks_cluster_name
 
   count = var.enableEKS ? 1 : 0
 }
@@ -119,17 +131,29 @@ resource "null_resource" "arc_eks_cluster" {
   }
 
   count      = var.enableEKS ? 1 : 0
-  depends_on = [ module.eks ]
+  depends_on = [ module.k8s_connect_eks ]
 }
 
-module "gke" {
-  source = "git::https://github.com/traefik-workshops/terraform-demo-modules.git//clusters/gke?ref=main"
+resource "null_resource" "arc_gke_cluster_destroy" {
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      # Check if context exists, and keep checking until it doesn't
+      while kubectl config get-contexts "gke-traefik-demo" &>/dev/null; do
+        echo "Waiting for gke-traefik-demo context to be deleted..."
+        sleep 5
+      done
+      echo "gke-traefik-demo context has been deleted"
+    EOT
+  }
 
-  gke_version               = var.gkeVersion
-  cluster_name              = local.gke_cluster_name
-  cluster_location          = var.gkeClusterLocation
-  cluster_node_machine_type = var.gkeClusterMachineType
-  cluster_node_count        = var.gkeClusterNodeCount
+  count = var.enableGKE ? 1 : 0
+}
+
+module "k8s_connect_gke" {
+  source = "./modules/k8s-connect"
+
+  context_name = local.gke_cluster_name
 
   count = var.enableGKE ? 1 : 0
 }
@@ -149,7 +173,7 @@ resource "null_resource" "arc_gke_cluster" {
       az connectedk8s connect \
         --kube-context "${local.gke_cluster_name}" \
         --name "arc-${local.gke_cluster_name}" \
-        --resource-group "traefik-demo"
+        --resource-group ${azurerm_resource_group.traefik_demo.name}
     EOT
   }
 
@@ -165,7 +189,7 @@ resource "null_resource" "arc_gke_cluster" {
   }
 
   count      = var.enableGKE ? 1 : 0
-  depends_on = [ module.gke ]
+  depends_on = [ module.k8s_connect_gke ]
 }
 
 resource "null_resource" "arc_clusters" {

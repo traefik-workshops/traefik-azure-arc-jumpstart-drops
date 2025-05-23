@@ -87,11 +87,11 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
   az extension update --name k8s-configuration
   ```
 
-* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/aws.tf` and `extensions/google.tf` files to the main directory.
+* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory.
 
 ```shell
-cp extensions/aws.tf .
-cp extensions/google.tf .
+cp extensions/eks.tf .
+cp extensions/gke.tf .
 ```
 
 * Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
@@ -136,7 +136,7 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
     -var="enableGKE=true" \
     -var="enableEKS=true"
   ```
-  > **Note:** Make sure to copy the `extensions/aws.tf` and `extensions/google.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
+  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
