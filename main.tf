@@ -43,11 +43,12 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
   git_repository {
     url = "https://github.com/traefik-workshops/traefik-airlines.git"
     reference_type = "tag"
-    reference_value = "v0.0.6"
+    reference_value = "v0.0.12"
   }
 
   kustomizations {
-    name = "traefik-airlines"
+    name = "traefik-airlines-customers"
+    path = "${var.enableTraefikHub ? "hub" : "proxy"}"
   }
 
   for_each   = var.enableTraefikAirlines ? local.clusters : []

@@ -16,6 +16,56 @@ variable "enableTraefikAirlinesTLS" {
   default     = true
 }
 
+variable "enableTraefikHub" {
+  type        = bool
+  description = "Enable Traefik Hub"
+  default     = false
+}
+
+variable "traefikHubK3DLicenseKey" {
+  type        = string
+  description = "Traefik Hub license key for K3D"
+  default     = ""
+
+  validation {
+    condition     = !(var.enableTraefikHub && var.enableK3D && var.traefikHubK3DLicenseKey == "")
+    error_message = "Traefik Hub license key is required when Traefik Hub is enabled and K3D is enabled"
+  }
+}
+
+variable "traefikHubAKSLicenseKey" {
+  type        = string
+  description = "Traefik Hub license key for AKS"
+  default     = ""
+
+  validation {
+    condition     = !(var.enableTraefikHub && var.enableAKS && var.traefikHubAKSLicenseKey == "")
+    error_message = "Traefik Hub license key is required when Traefik Hub is enabled and AKS is enabled"
+  }
+}
+
+variable "traefikHubEKSLicenseKey" {
+  type        = string
+  description = "Traefik Hub license key for EKS"
+  default     = ""
+
+  validation {
+    condition     = !(var.enableTraefikHub && var.enableEKS && var.traefikHubEKSLicenseKey == "")
+    error_message = "Traefik Hub license key is required when Traefik Hub is enabled and EKS is enabled"
+  }
+}
+
+variable "traefikHubGKELicenseKey" {
+  type        = string
+  description = "Traefik Hub license key for GKE"
+  default     = ""
+
+  validation {
+    condition     = !(var.enableTraefikHub && var.enableGKE && var.traefikHubGKELicenseKey == "")
+    error_message = "Traefik Hub license key is required when Traefik Hub is enabled and GKE is enabled"
+  }
+}
+
 variable "azureSubscriptionId" {
   type        = string
   description = "Azure subscription ID to use for the deployment"

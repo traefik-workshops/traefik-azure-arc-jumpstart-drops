@@ -6,7 +6,9 @@ locals {
     "kubernetesCRD.enabled": "true",
     "ingressRoute.dashboard.enabled": "true",
     "ports.traefik.expose.default": "true",
-    "rbac.enabled": "true"
+    "rbac.enabled": "true",
+    "hub.apimanagement.enabled": var.enableTraefikHub ? "true" : "false",
+    "versionOverride": var.enableTraefikHub ? "v3.16.1" : "v3.4.0"
   }
 
   certificatesResolvers = var.enableTraefikAirlinesTLS ? {
@@ -19,16 +21,20 @@ locals {
 
   clusterSettings = {
     "k3d" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubK3DLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
     }
     "aks" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubAKSLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.aks`)"
     }
     "eks" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubEKSLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.eks`)"
       "service.annotations.service\\.beta\\.kubernetes\\.io\\/aws-load-balancer-type" = "nlb"
     }
     "gke" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubGKELicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.gke`)"
     }
   }
