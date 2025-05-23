@@ -154,7 +154,7 @@ You can now view your Traefik dashboard locally at [http://dashboard.traefik.loc
 If you would like to view the Traefik dashboard on the rest Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
 
   ```shell
-  sudo ./update_hosts.sh
+  sudo ./2-traefik/update_hosts.sh
   ```
 
 Example output to `/etc/hosts` file:
@@ -166,7 +166,7 @@ Example output to `/etc/hosts` file:
   34.106.34.172		  dashboard.traefik.gke
   ```
 
-Example output of `sudo ./update_hosts.sh`:
+Example output of `sudo ./2-traefik/update_hosts.sh`:
 
   ```shell
   Successfully updated /etc/hosts with available Traefik endpoints
