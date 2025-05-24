@@ -12,7 +12,13 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
   az --version
   ```
 
-* [Install k3d](https://k3d.io/stable/#installation)
+* [Optional] [Install k3d](https://k3d.io/stable/#installation)
+
+* [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+* [Optional] [Install and configure gcloud if you plan to deploy GKE](https://cloud.google.com/sdk/docs/install)
+
+* [Optional] [Install gke-cloud-auth-plugin if you plan to deploy GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
 
 * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
@@ -89,17 +95,40 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
 
 ## Getting Started
 
+  > **Note:** You must accept the terms for Traefik for Azure Arc before you can deploy it to your Arc-enabled Kubernetes clusters. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
+
+    ```shell
+    az term accept --publisher containous --product traefik-on-arc --plan traefik-byol
+    ```
+
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform
+Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform:
+
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
-  terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
+  terraform apply \
+    -var-file="2-traefik/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+  ```
+
+You can also enable the install on EKS and GKE clusters as well using Terraform:
+
+  ```shell
+  cd traefik-azure-arc-jumpstart-drops
+  terraform init
+  terraform apply \
+    -var-file="2-traefik/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
   ```
 
 ## Testing
@@ -107,11 +136,45 @@ Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_M
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
   ```shell
-  az connectedk8s show --name traefik-arc-aks-demo --resource-group $(terraform output -raw resourceGroupName)
-  az connectedk8s show --name traefik-arc-k3d-demo --resource-group $(terraform output -raw resourceGroupName)
+  az connectedk8s show --name arc-k3d-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-aks-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-eks-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-gke-traefik-demo --resource-group traefik-demo
   ```
 
 You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
+
+If you would like to view the Traefik dashboard on the rest Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
+
+  ```shell
+  sudo ./2-traefik/update_hosts.sh
+  ```
+
+Example output to `/etc/hosts` file:
+
+  ```shell
+  # Traefik dashboard entries - auto-generated from kubectl outputs
+  20.253.255.25		  dashboard.traefik.aks
+  54.219.221.253		dashboard.traefik.eks
+  34.106.34.172		  dashboard.traefik.gke
+  ```
+
+Example output of `sudo ./2-traefik/update_hosts.sh`:
+
+  ```shell
+  Successfully updated /etc/hosts with available Traefik endpoints
+
+  Current Traefik endpoints:
+  - AKS: http://dashboard.traefik.aks:8080
+  - EKS: http://dashboard.traefik.eks:8080
+  - GKE: http://dashboard.traefik.gke:8080
+  ```
+
+You can now view your Traefik dashboard on the rest Arc-enabled Kubernetes clusters at:
+
+[http://dashboard.traefik.aks:8080](http://dashboard.traefik.aks:8080)
+[http://dashboard.traefik.eks:8080](http://dashboard.traefik.eks:8080)
+[http://dashboard.traefik.gke:8080](http://dashboard.traefik.gke:8080)
 
 ## ARM Template Example
 
@@ -160,6 +223,44 @@ To be able to deploy Arc specific marketplace applications with Terraform, you n
 
 ## Teardown
 
+To remove the Arc-enabled AKS cluster, run the following commands:
+
   ```shell
-  terraform destroy -var="azureSubscriptionId=$(az account show --query id -o tsv)" -var-file="2-traefik/terraform.tfvars"
+  terraform destroy \
+    -var-file="2-traefik/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
+
+If you enabled k3d, EKS and GKE clusters, run the following commands:
+
+  ```shell
+  terraform destroy \
+    -var-file="2-traefik/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
+  ```
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"

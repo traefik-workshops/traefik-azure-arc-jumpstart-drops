@@ -1,4 +1,5 @@
 enableAKS                = true
 enableTraefik            = true
 enableTraefikAirlines    = true
-enableTraefikAirlinesTLS = false
+enableTraefikAirlinesTLS = true
+enableTraefikHub         = true

@@ -1,23 +1,8 @@
-# Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik
+# Multi-cluster API Management with Traefik Hub
 
 ## Overview
 
-This drop demonstrates how to deploy and expose a microservices application across multiple Arc-enabled Kubernetes clusters using FluxCD and Traefik.
-
-### Application Architecture
-
-The Traefik Airlines demo application consists of four microservices:
-
-- **Customers Service**: Manages customer data and loyalty programs
-- **Employees Service**: Handles employee information and scheduling
-- **Flights Service**: Manages flight schedules and availability
-- **Tickets Service**: Processes ticket bookings and reservations
-
-### Deployment Configuration
-
-- **GitOps with FluxCD**: Automated deployment from Git repository
-- **Traefik Integration**: Automatic service discovery and routing
-- **Multi-cluster Support**: Services accessible on all the deployed Arc-enabled Kubernetes clusters
+This drop demonstrates how to enable automatic HTTPS for your services using Traefik's Let's Encrypt integration.
 
 ## Prerequisites
 
@@ -110,20 +95,24 @@ The Traefik Airlines demo application consists of four microservices:
 
 ## Getting Started
 
+You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). You you have please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow this guide to grab the license key for each cluster: [here](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin).
+
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install Traefik Airlines k8s application:
+Update Traefik configuration to handle Let's Encrypt certificates:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="3-routing/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var-file="5-api-management/terraform.tfvars" \
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>"
   ```
 
 You can also enable the install on EKS and GKE clusters as well using Terraform:
@@ -132,11 +121,15 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="3-routing/terraform.tfvars" \
+    -var-file="5-api-management/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
   > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
@@ -144,54 +137,44 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
 
 Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
 
+### AKS/GKE
+
   ```shell
-  k3d_address="localhost:8000"
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
   gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
   ```
 
-### Services
+### EKS
 
-  Customers service:
   ```shell
-  curl http://$k3d_address -H "Host: customers.traefik-airlines"
+  eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
+  eks_address_0=$(echo $eks_ips | sed -n 1p)
+  eks_address_1=$(echo $eks_ips | sed -n 2p)
+
   ```
 
-  Employees service:
+### Customers service
+
   ```shell
-  curl http://$aks_address -H "Host: employees.traefik-airlines"
+  curl https://customers.traefik-airlines.${aks_address}.sslip.io
   ```
 
-  Flights service:
+### Employees service
+
   ```shell
-  curl http://$eks_address -H "Host: flights.traefik-airlines"
+  curl https://employees.traefik-airlines.${gke_address}.sslip.io
   ```
 
-  Tickets service:
+### Flights service
+
   ```shell
-  curl http://$gke_address -H "Host: tickets.traefik-airlines"
+  curl https://flights.traefik-airlines.${eks_address_0}.sslip.io
   ```
 
-## Use FluxCD to deploy Traefik Airlines
-Azure Arc Kubernetes' recommended GitOps tool is FluxCD. FluxCD is used to deploy the Traefik Airlines application to the AKS cluster using Terraform in the follow code snippet.
+### Tickets service
 
-  ```hcl
-  resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
-    name       = "traefik-airlines"
-    cluster_id = "traefik-arc-aks-demo"
-    namespace  = "traefik-airlines"
-
-    git_repository {
-      url = "https://github.com/traefik-workshops/traefik-airlines.git"
-      reference_type = "tag"
-      reference_value = "v0.0.6"
-    }
-
-    kustomizations {
-      name = "traefik-airlines"
-    }
-  }
+  ```shell
+  curl https://tickets.traefik-airlines.${eks_address_0}.sslip.io
   ```
 
 ## Teardown
@@ -200,7 +183,7 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
+    -var-file="4-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
@@ -208,7 +191,7 @@ If you enabled EKS and GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
+    -var-file="4-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableGKE=true" \

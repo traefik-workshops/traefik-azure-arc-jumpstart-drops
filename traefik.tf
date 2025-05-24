@@ -1,25 +1,47 @@
 locals {
   traefik = {
     "deployment.replicas": "1",
-    "global.azure.enabled": true,
-    "ingressClass.enabled": false,
+    "global.azure.enabled": "true",
+    "ingressClass.enabled": "true",
+    "kubernetesCRD.enabled": "true",
     "ingressRoute.dashboard.enabled": "true",
-    "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik`) || Host(`dashboard.traefik.localhost`)",
     "ports.traefik.expose.default": "true",
-    "versionOverride": "v3.3.6"
+    "rbac.enabled": "true",
+    "hub.apimanagement.enabled": var.enableTraefikHub ? "true" : "false",
+    "versionOverride": var.enableTraefikHub ? "v3.16.1" : "v3.4.0"
   }
 
-  certificatesResolvers = var.enable_traefik_airlines_tls ? {
+  certificatesResolvers = var.enableTraefikAirlinesTLS ? {
     "certificatesResolvers.traefik-airlines.acme.email": "zaid@traefik.io",
     "certificatesResolvers.traefik-airlines.acme.storage": "/data/acme.json",
     "certificatesResolvers.traefik-airlines.acme.httpChallenge.entryPoint": "web"
   } : {}
 
   config = merge(local.traefik, local.certificatesResolvers)
+
+  clusterSettings = {
+    "aks" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubAKSLicenseKey : ""}",
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.aks`)"
+    }
+    "k3d" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubK3DLicenseKey : ""}",
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
+    }
+    "eks" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubEKSLicenseKey : ""}",
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.eks`)"
+      "service.annotations.service\\.beta\\.kubernetes\\.io\\/aws-load-balancer-type" = "nlb"
+    }
+    "gke" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubGKELicenseKey : ""}",
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.gke`)"
+    }
+  }
 }
 
 resource "azurerm_resource_group_template_deployment" "traefik" {
-  name                = "traefik"
+  name                = "traefik-${each.key}"
   resource_group_name = azurerm_resource_group.traefik_demo.name
   deployment_mode     = "Incremental"
   template_content = <<TEMPLATE
@@ -31,7 +53,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
     "resources": [
         {
             "apiVersion": "2023-05-01",
-            "name": "traefik",
+            "name": "traefik-${each.key}",
             "plan": {
                 "name": "traefik-byol",
                 "product": "traefik-on-arc",
@@ -40,7 +62,7 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
             "properties": {
                 "autoUpgradeMinorVersion": "true",
                 "configurationProtectedSettings": {},
-                "configurationSettings": ${jsonencode(local.config)},
+                "configurationSettings": ${jsonencode(merge(local.config, local.clusterSettings[each.key]))},
                 "extensionType": "TraefikLabs.TraefikProxyOnArc",
                 "releaseTrain": "stable",
                 "scope": {
@@ -49,13 +71,30 @@ resource "azurerm_resource_group_template_deployment" "traefik" {
                     }
                 }
             },
-            "scope": "Microsoft.Kubernetes/connectedClusters/${"aks" == each.value ? local.arc_aks_cluster_name : local.arc_k3d_cluster_name}",
+            "scope": "Microsoft.Kubernetes/connectedClusters/arc-${each.key}-traefik-demo",
             "type": "Microsoft.KubernetesConfiguration/extensions"
         }
     ]
 }
 TEMPLATE
 
-  for_each   = var.enable_traefik ? toset(local.clusters) : []
-  depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster ]
+  for_each   = var.enableTraefik ? toset(local.clusters) : []
+  depends_on = [null_resource.arc_clusters]
+}
+
+// Needed because resource destory is flaky and those resources stand up LBs that are not tracked by the state
+resource "null_resource" "azurerm_resource_group_template_deployment_traefik_destroy" {
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      az k8s-extension delete --yes \
+        --name "traefik-${each.key}" \
+        --cluster-name "arc-${each.key}-traefik-demo" \
+        --resource-group "traefik-demo" \
+        --cluster-type connectedClusters
+    EOT
+  }
+
+  for_each   = var.enableTraefik ? toset(local.clusters) : []
+  depends_on = [ azurerm_resource_group_template_deployment.traefik ]
 }
