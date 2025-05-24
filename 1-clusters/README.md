@@ -1,17 +1,17 @@
-# Deploy Arc-enabled k3d, AKS, EKS, and GKE clusters with Terraform
+# Deploy Arc-enabled AKS, k3d, EKS, and GKE clusters with Terraform
 
 ## Overview
 
-This drop demonstrates how to deploy and Arc-enable k3d, AKS, EKS, and GKE clusters using Terraform. The deployment includes:
-
-- **k3d Cluster**:
-  - Local Kubernetes cluster using k3s in Docker
-  - Exposed ports for ingress (8000, 8443, 8080)
-  - Azure Arc extension installation
+This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clusters using Terraform. The deployment includes:
 
 - **AKS Cluster**:
   - Single node pool with configurable VM size
   - Exposed ports for ingress (80, 443, 8080)
+  - Azure Arc extension installation
+
+- **k3d Cluster**:
+  - Local Kubernetes cluster using k3s in Docker
+  - Exposed ports for ingress (8000, 8443, 8080)
   - Azure Arc extension installation
 
 - **EKS Cluster**:
@@ -107,13 +107,6 @@ This drop demonstrates how to deploy and Arc-enable k3d, AKS, EKS, and GKE clust
   az extension update --name k8s-configuration
   ```
 
-* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory.
-
-```shell
-cp extensions/eks.tf .
-cp extensions/gke.tf .
-```
-
 * Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
 
   ```shell
@@ -128,7 +121,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository:
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install k3d and AKS clusters using Terraform:
+Install AKS cluster using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -138,7 +131,33 @@ Install k3d and AKS clusters using Terraform:
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-You can also enable the install of EKS and GKE clusters as well using Terraform:
+You can also enable the install of k3d, EKS or GKE clusters as well using Terraform:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d init
+  terraform -chdir=./1-clusters/k3d apply
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks init
+  terraform -chdir=./1-clusters/eks apply
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke init
+  terraform -chdir=./1-clusters/gke apply \
+    -var="googleProjectId=$(gcloud config get-value project)"
+  ```
+
+### Extra Clusters
+
+Once you finish install all the extra clusters you can run the following command to connect them to Azure Arc:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -147,20 +166,20 @@ You can also enable the install of EKS and GKE clusters as well using Terraform:
     -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
-    -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableK3D=true" \
+    -var="enableEKS=true" \
+    -var="enableGKE=true"
   ```
-  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
 Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, and are accessible using `kubectl`:
 
   ```shell
-  kubectl --context=$(terraform output -raw k3dClusterName) get nodes
-  kubectl --context=$(terraform output -raw aksClusterName) get nodes
-  kubectl --context=$(terraform output -raw eksClusterName) get nodes
-  kubectl --context=$(terraform output -raw gkeClusterName) get nodes
+  kubectl --context=aks-traefik-demo get nodes
+  kubectl --context=k3d-traefik-demo get nodes
+  kubectl --context=eks-traefik-demo get nodes
+  kubectl --context=gke-traefik-demo get nodes
   ```
 
 ## Arc-enable clusters
@@ -211,6 +230,30 @@ If you enabled EKS and GKE clusters, run the following commands:
     -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
-    -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableK3D=true" \
+    -var="enableEKS=true" \
+    -var="enableGKE=true"
+  ```
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"
   ```

@@ -5,39 +5,6 @@ locals {
   gke_cluster_name = "gke-traefik-demo"
 }
 
-module "k3d" {
-  source = "git::https://github.com/traefik-workshops/terraform-demo-modules.git//clusters/k3d?ref=main"
-
-  cluster_name = "traefik-demo"
-
-  count = var.enableK3D ? 1 : 0
-}
-
-resource "null_resource" "arc_k3d_cluster" {
-  provisioner "local-exec" {
-    command = <<EOT
-      az connectedk8s connect \
-        --kube-context ${local.k3d_cluster_name} \
-        --name "arc-${local.k3d_cluster_name}" \
-        --resource-group ${azurerm_resource_group.traefik_demo.name}
-    EOT
-  }
-
-  provisioner "local-exec" {
-    when = destroy
-    command = <<EOT
-      az connectedk8s delete --force --yes \
-        --name "arc-k3d-traefik-demo" \
-        --resource-group "traefik-demo"
-
-      kubectl config delete-context "k3d-traefik-demo" 2>/dev/null || true
-    EOT
-  }
-
-  count      = var.enableK3D ? 1 : 0
-  depends_on = [ module.k3d ]
-}
-
 module "aks" {
   source = "git::https://github.com/traefik-workshops/terraform-demo-modules.git//clusters/aks?ref=main"
 
@@ -47,8 +14,6 @@ module "aks" {
   cluster_location     = var.aksClusterLocation
   cluster_machine_type = var.aksClusterMachineType
   cluster_node_count   = var.aksClusterNodeCount
-
-  count = var.enableAKS ? 1 : 0
 }
 
 resource "null_resource" "arc_aks_cluster" {
@@ -81,28 +46,29 @@ resource "null_resource" "arc_aks_cluster" {
   depends_on = [ module.aks ]
 }
 
-resource "null_resource" "arc_eks_cluster_destroy" {
+
+resource "null_resource" "arc_k3d_cluster" {
   provisioner "local-exec" {
-    when = destroy
     command = <<EOT
-      # Check if context exists, and keep checking until it doesn't
-      while kubectl config get-contexts "eks-traefik-demo" &>/dev/null; do
-        echo "Waiting for eks-traefik-demo context to be deleted..."
-        sleep 5
-      done
-      echo "eks-traefik-demo context has been deleted"
+      az connectedk8s connect \
+        --kube-context ${local.k3d_cluster_name} \
+        --name "arc-${local.k3d_cluster_name}" \
+        --resource-group ${azurerm_resource_group.traefik_demo.name}
     EOT
   }
 
-  count = var.enableEKS ? 1 : 0
-}
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      az connectedk8s delete --force --yes \
+        --name "arc-k3d-traefik-demo" \
+        --resource-group "traefik-demo"
 
-module "k8s_connect_eks" {
-  source = "./modules/k8s-connect"
+      kubectl config delete-context "k3d-traefik-demo" 2>/dev/null || true
+    EOT
+  }
 
-  context_name = local.eks_cluster_name
-
-  count = var.enableEKS ? 1 : 0
+  count = var.enableK3D ? 1 : 0
 }
 
 resource "null_resource" "arc_eks_cluster" {
@@ -130,39 +96,12 @@ resource "null_resource" "arc_eks_cluster" {
     EOT
   }
 
-  count      = var.enableEKS ? 1 : 0
-  depends_on = [ module.k8s_connect_eks ]
-}
-
-resource "null_resource" "arc_gke_cluster_destroy" {
-  provisioner "local-exec" {
-    when = destroy
-    command = <<EOT
-      # Check if context exists, and keep checking until it doesn't
-      while kubectl config get-contexts "gke-traefik-demo" &>/dev/null; do
-        echo "Waiting for gke-traefik-demo context to be deleted..."
-        sleep 5
-      done
-      echo "gke-traefik-demo context has been deleted"
-    EOT
-  }
-
-  count = var.enableGKE ? 1 : 0
-}
-
-module "k8s_connect_gke" {
-  source = "./modules/k8s-connect"
-
-  context_name = local.gke_cluster_name
-
-  count = var.enableGKE ? 1 : 0
+  count = var.enableEKS ? 1 : 0
 }
 
 resource "null_resource" "arc_gke_cluster" {
   provisioner "local-exec" {
     command = <<EOT
-      sleep 60
-
       gcloud container clusters get-credentials ${local.gke_cluster_name} \
         --zone ${var.gkeClusterLocation} \
         --project ${var.googleProjectId}
@@ -188,16 +127,5 @@ resource "null_resource" "arc_gke_cluster" {
     EOT
   }
 
-  count      = var.enableGKE ? 1 : 0
-  depends_on = [ module.k8s_connect_gke ]
-}
-
-resource "null_resource" "arc_clusters" {
-  provisioner "local-exec" {
-    command = <<EOT
-      sleep 60
-    EOT
-  }
-
-  depends_on = [ null_resource.arc_k3d_cluster, null_resource.arc_aks_cluster, null_resource.arc_eks_cluster, null_resource.arc_gke_cluster ]
+  count = var.enableGKE ? 1 : 0
 }

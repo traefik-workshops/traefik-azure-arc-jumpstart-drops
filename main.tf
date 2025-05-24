@@ -1,11 +1,11 @@
 locals {
   arc_cluster_prefix = "/subscriptions/${var.azureSubscriptionId}/resourceGroups/${azurerm_resource_group.traefik_demo.name}/providers/Microsoft.Kubernetes/connectedClusters"
 
-  k3d = var.enableK3D ? ["k3d"] : []
   aks = var.enableAKS ? ["aks"] : []
+  k3d = var.enableK3D ? ["k3d"] : []
   eks = var.enableEKS ? ["eks"] : []
   gke = var.enableGKE ? ["gke"] : []
-  clusters = toset(concat(local.k3d, local.aks, local.eks, local.gke))
+  clusters = toset(concat(local.aks, local.k3d, local.eks, local.gke))
 }
 
 provider "azurerm" {

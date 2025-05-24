@@ -87,13 +87,6 @@ This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled 
   az extension update --name k8s-configuration
   ```
 
-* [Optional] If you are looking to deploy EKS and GKE clusters, make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory.
-
-```shell
-cp extensions/eks.tf .
-cp extensions/gke.tf .
-```
-
 * Accept Terms for Traefik for Azure Arc. You can either choose to run this command to accept the Traefik terms or accept the terms in the Azure Arc [marketplace](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc).
 
   ```shell
@@ -133,20 +126,20 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
     -var-file="2-traefik/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
   ```
-  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
   ```shell
-  az connectedk8s show --name arc-$(terraform output -raw k3dClusterName) --resource-group $(terraform output -raw resourceGroupName)
-  az connectedk8s show --name arc-$(terraform output -raw aksClusterName) --resource-group $(terraform output -raw resourceGroupName)
-  az connectedk8s show --name arc-$(terraform output -raw eksClusterName) --resource-group $(terraform output -raw resourceGroupName)
-  az connectedk8s show --name arc-$(terraform output -raw gkeClusterName) --resource-group $(terraform output -raw resourceGroupName)
+  az connectedk8s show --name arc-k3d-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-aks-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-eks-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-gke-traefik-demo --resource-group traefik-demo
   ```
 
 You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
@@ -230,21 +223,44 @@ To be able to deploy Arc specific marketplace applications with Terraform, you n
 
 ## Teardown
 
-To remove the Arc-enabled clusters, run the following commands:
+To remove the Arc-enabled AKS cluster, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
+    -var-file="2-traefik/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-If you enabled EKS and GKE clusters, run the following commands:
+If you enabled k3d, EKS and GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
+    -var-file="2-traefik/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
   ```
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"

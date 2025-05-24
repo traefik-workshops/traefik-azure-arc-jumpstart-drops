@@ -20,13 +20,13 @@ locals {
   config = merge(local.traefik, local.certificatesResolvers)
 
   clusterSettings = {
-    "k3d" = {
-      "hub.token": "${var.enableTraefikHub ? var.traefikHubK3DLicenseKey : ""}",
-      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
-    }
     "aks" = {
       "hub.token": "${var.enableTraefikHub ? var.traefikHubAKSLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.aks`)"
+    }
+    "k3d" = {
+      "hub.token": "${var.enableTraefikHub ? var.traefikHubK3DLicenseKey : ""}",
+      "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
     }
     "eks" = {
       "hub.token": "${var.enableTraefikHub ? var.traefikHubEKSLicenseKey : ""}",
