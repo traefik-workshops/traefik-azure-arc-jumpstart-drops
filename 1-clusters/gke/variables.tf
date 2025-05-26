@@ -1,7 +1,6 @@
 variable "googleProjectId" {
   type        = string
   description = "Google project ID to use for the deployment"
-  default     = ""
 }
 
 variable "gkeVersion" {
@@ -13,7 +12,7 @@ variable "gkeVersion" {
 variable "gkeClusterLocation" {
   type        = string
   description = "GKE cluster location to use for the deployment"
-  default     = "us-west3"
+  default     = "us-west3-a"
 }
 
 variable "gkeClusterMachineType" {
@@ -25,5 +24,5 @@ variable "gkeClusterMachineType" {
 variable "gkeClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
-  default     = 1
+  default     = 2
 }

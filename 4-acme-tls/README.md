@@ -120,23 +120,25 @@ Update Traefik configuration to handle Let's Encrypt certificates:
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="4-tls/terraform.tfvars" \
+    -var-file="4-acme-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-You can also enable the install on EKS and GKE clusters as well using Terraform:
+  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
+
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="4-tls/terraform.tfvars" \
+    -var-file="4-acme-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
   ```
-  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 Deploy TLS enabled routes to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-tls.sh` script to deploy the TLS enabled routes to all clusters.
 
@@ -144,7 +146,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 
   ```shell
   aks_ip="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  sed "s/EXTERNAL_IP/$aks_ip/g" "4-tls/resources/traefik-airlines-tls.yaml" | \
+  sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/traefik-airlines-tls.yaml" | \
   kubectl apply \
     --namespace "traefik-airlines" \
     --context "aks-traefik-demo" -f -;
@@ -153,7 +155,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 ### AKS/EKS/GKE
 
   ```shell
-  ./deploy-tls.sh
+  ./4-acme-tls/deploy-tls.sh
   ```
 
   Example output:
@@ -191,7 +193,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
+Verify that Traefik Airlines applications are exposed through Traefik through the Arc-enabled clusters. You can choose any of the clusters to test against.
 
 ### AKS/GKE
 
@@ -206,7 +208,6 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
   eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
   eks_address_0=$(echo $eks_ips | sed -n 1p)
   eks_address_1=$(echo $eks_ips | sed -n 2p)
-
   ```
 
 ### Customers service
@@ -230,7 +231,7 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
 ### Tickets service
 
   ```shell
-  curl https://tickets.traefik-airlines.${eks_address_0}.sslip.io
+  curl https://tickets.traefik-airlines.${eks_address_1}.sslip.io
   ```
 
 ## Teardown
@@ -239,16 +240,39 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="4-tls/terraform.tfvars" \
+    -var-file="4-acme-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-If you enabled EKS and GKE clusters, run the following commands:
+If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="4-tls/terraform.tfvars" \
+    -var-file="4-acme-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"

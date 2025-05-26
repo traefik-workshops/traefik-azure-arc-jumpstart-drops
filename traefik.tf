@@ -7,7 +7,7 @@ locals {
     "ingressRoute.dashboard.enabled": "true",
     "ports.traefik.expose.default": "true",
     "rbac.enabled": "true",
-    "hub.apimanagement.enabled": var.enableTraefikHub ? "true" : "false",
+    "hub.apimanagement.enabled": var.enableTraefikHubManagement ? "true" : "false",
     "versionOverride": var.enableTraefikHub ? "v3.16.1" : "v3.4.0"
   }
 

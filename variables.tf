@@ -16,9 +16,26 @@ variable "enableTraefikAirlinesTLS" {
   default     = true
 }
 
+variable "enableTraefikAirlinesOauth2" {
+  type        = bool
+  description = "Enable Traefik Airlines Oauth2"
+  default     = false
+}
+
 variable "enableTraefikHub" {
   type        = bool
   description = "Enable Traefik Hub"
+  default     = false
+
+  validation {
+    condition     = var.enableTraefikHub || !var.enableTraefikAirlinesOauth2
+    error_message = "Traefik Hub is required when Traefik Airlines Oauth2 is enabled"
+  }
+}
+
+variable "enableTraefikHubManagement" {
+  type        = bool
+  description = "Enable Traefik Hub Management"
   default     = false
 }
 
@@ -148,5 +165,5 @@ variable "googleProjectId" {
 variable "gkeClusterLocation" {
   type        = string
   description = "GKE cluster location to use for the deployment"
-  default     = "us-west3"
+  default     = "us-west3-a"
 }

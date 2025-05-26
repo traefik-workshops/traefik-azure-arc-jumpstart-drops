@@ -129,3 +129,16 @@ resource "null_resource" "arc_gke_cluster" {
 
   count = var.enableGKE ? 1 : 0
 }
+
+resource "null_resource" "arc_clusters" {
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "${local.aks_cluster_name}"
+      echo "${local.k3d_cluster_name}"
+      echo "${local.eks_cluster_name}"
+      echo "${local.gke_cluster_name}"
+    EOT
+  }
+
+  depends_on = [ null_resource.arc_aks_cluster, null_resource.arc_k3d_cluster, null_resource.arc_eks_cluster, null_resource.arc_gke_cluster ]
+}

@@ -117,7 +117,9 @@ Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_M
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-You can also enable the install on EKS and GKE clusters as well using Terraform:
+  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
+
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -142,7 +144,7 @@ Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
   az connectedk8s show --name arc-gke-traefik-demo --resource-group traefik-demo
   ```
 
-You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080)
+You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080) if you enabled the k3d cluster.
 
 If you would like to view the Traefik dashboard on the rest Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
 
@@ -231,7 +233,7 @@ To remove the Arc-enabled AKS cluster, run the following commands:
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-If you enabled k3d, EKS and GKE clusters, run the following commands:
+If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \

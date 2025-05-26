@@ -126,7 +126,9 @@ Install Traefik Airlines k8s application:
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-You can also enable the install on EKS and GKE clusters as well using Terraform:
+  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
+
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -135,10 +137,10 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
     -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
   ```
-  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
@@ -204,12 +206,35 @@ To remove the Arc-enabled clusters, run the following commands:
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-If you enabled EKS and GKE clusters, run the following commands:
+If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
     -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"

@@ -155,8 +155,6 @@ You can also enable the install of k3d, EKS or GKE clusters as well using Terraf
     -var="googleProjectId=$(gcloud config get-value project)"
   ```
 
-### Extra Clusters
-
 Once you finish install all the extra clusters you can run the following command to connect them to Azure Arc:
 
   ```shell
@@ -223,7 +221,9 @@ To remove the Arc-enabled clusters, run the following commands:
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-If you enabled EKS and GKE clusters, run the following commands:
+  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
+
+If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
