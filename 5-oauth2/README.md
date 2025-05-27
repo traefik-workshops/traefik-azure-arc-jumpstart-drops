@@ -105,7 +105,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Upgrade Traefik Proxy to Traefik Hub Gateway and deploy Traefik API CRDs to manage Traefik Airlines routes:
+Install Traefik Hub Gateway and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops

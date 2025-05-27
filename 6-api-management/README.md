@@ -107,7 +107,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Upgrade Traefik Proxy to Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
+Install Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -161,18 +161,22 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 
 Before you generate a JWT token, you must login with the user that you are generating a token for and consent to the application permissions.
 
+First, get the username:
+
   ```shell
   username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
   echo $username
   ```
 
-Consent link:
+Secondly, get the consent link:
 
 ```shell
 echo "https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/authorize?client_id=$(terraform output -raw entraIDApplicationClientID)&response_type=code&response_mode=query&scope=User.Read&prompt=consent"
 ```
 
-Visit [https://login.microsoftonline.com](https://login.microsoftonline.com) and login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
+Use the consent link to login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
+
+  > **Note:** The consent flow will give an error at end of the flow, but the consent will be submitted successfully.
 
   ```shell
   access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
