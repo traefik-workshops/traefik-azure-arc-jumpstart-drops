@@ -1,7 +1,7 @@
 {
     "Title": "OpenAPISpec with Traefik Developer Portal",
-    "Summary": "This Jumpstart Drop provides configurations for deploying APIs to Traefik Developer Portal and utilizating OpenAPI spec to generate API documentation.",
-    "Description": "This Jumpstart Drop provides configurations for deploying APIs to Traefik Developer Portal and utilizating OpenAPI spec to generate API documentation. It also demonstrates how to configure API Management authentication with Microsoft Entra ID as the Identity Provider to secure applications running on Traefik across multiple Kubernetes clusters. As well as, leverage Entra ID to secure the Developer Portal.",
+    "Summary": "This Jumpstart Drop provides configurations for deploying APIs to Traefik Developer Portal and utilizing OpenAPI spec to generate API documentation.",
+    "Description": "This Jumpstart Drop provides configurations for deploying APIs to Traefik Developer Portal and utilizing OpenAPI spec to generate API documentation. It also demonstrates how to configure API Management authentication with Microsoft Entra ID as the Identity Provider to secure applications running on Traefik across multiple Kubernetes clusters. As well as, leverage Entra ID to secure the Developer Portal.",
     "Cover": "",
     "Authors": [
       {

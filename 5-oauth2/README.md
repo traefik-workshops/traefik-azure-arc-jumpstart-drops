@@ -6,7 +6,7 @@ This drop demonstrates how to enable OAuth2 with Traefik and Microsoft Entra ID 
 
 Traefik can support any Oauth2.0 compliant Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
-The terraform scirpt will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik. 
+The terraform script will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik. 
 
 ## Prerequisites
 
@@ -99,7 +99,7 @@ The terraform scirpt will create a Microsoft Entra ID application and a group fo
 
 ## Getting Started
 
-You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). You you have please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow this guide to grab the license key for each cluster: [here](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin).
+You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow this guide to grab the license key for each cluster: [here](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin).
 
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
