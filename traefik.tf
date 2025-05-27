@@ -82,7 +82,7 @@ TEMPLATE
   depends_on = [null_resource.arc_clusters]
 }
 
-// Needed because resource destory is flaky and those resources stand up LBs that are not tracked by the state
+// Needed because resource destroy is flaky and those resources stand up LBs that are not tracked by the state
 resource "null_resource" "azurerm_resource_group_template_deployment_traefik_destroy" {
   provisioner "local-exec" {
     when = destroy
