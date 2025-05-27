@@ -1,12 +1,12 @@
-# Multi-cluster API Management with Traefik Hub
+# Multi-cluster API Management with Traefik Developer Portal
 
 ## Overview
 
-This drop demonstrates how to enable API management with Traefik Hub to manage and secure your applications. It extends the previous drops by adding API management capabilities to the Traefik Airlines application.
+This drop demonstrates how to enable API management with Traefik Developer Portal to manage and secure your applications. It extends the previous drops by adding API management capabilities to the Traefik Airlines application and deploying Traefik Developer Portal CRDs to manage and secure the Traefik Airlines Developer Portal.
 
 Traefik can support any Oauth2.0 compliant Identity Provider or you can use Traefik Hub Managements OOTB Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
-The terraform scirpt will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type.
+The terraform scirpt will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik.
 
 ## Prerequisites
 
