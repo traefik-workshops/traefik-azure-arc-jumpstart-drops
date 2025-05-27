@@ -31,8 +31,6 @@
     "Traefik Proxy",
     "ACME",
     "Terraform",
-    "API Gateway",
-    "API Management",
     "Infrastructure as Code"
   ]
 }

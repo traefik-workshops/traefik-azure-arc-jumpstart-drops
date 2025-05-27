@@ -155,7 +155,7 @@ You can also enable the install of k3d, EKS or GKE clusters as well using Terraf
     -var="googleProjectId=$(gcloud config get-value project)"
   ```
 
-Once you finish install all the extra clusters you can run the following command to connect them to Azure Arc:
+Once you finish installing the clusters you can run the following command to connect them to Azure Arc and create an AKS cluster. You can turn the AKS cluster off using the `enableAKS` variable:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops

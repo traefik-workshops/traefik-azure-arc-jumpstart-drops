@@ -142,9 +142,11 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
     -var="enableEKS=true"
   ```
 
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
+
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
+Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
@@ -187,7 +189,7 @@ Azure Arc Kubernetes' recommended GitOps tool is FluxCD. FluxCD is used to deplo
     git_repository {
       url = "https://github.com/traefik-workshops/traefik-airlines.git"
       reference_type = "tag"
-      reference_value = "v0.0.6"
+      reference_value = "v0.0.13"
     }
 
     kustomizations {
@@ -216,6 +218,7 @@ If you enabled k3d, EKS or GKE clusters, run the following commands:
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
+  ```
 
 ### Extra Clusters
 

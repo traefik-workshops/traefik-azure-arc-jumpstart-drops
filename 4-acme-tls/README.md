@@ -1,4 +1,4 @@
-# Secure Traefik Airlines application using Let's Encrypt and Traefik automated certificate management
+# Secure Traefik Airlines applications using Let's Encrypt and Traefik automated certificate management
 
 ## Overview
 
@@ -138,6 +138,8 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
     -var="enableEKS=true"
   ```
 
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
+
 Deploy TLS enabled routes to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-tls.sh` script to deploy the TLS enabled routes to all clusters.
 
 ### AKS
@@ -191,7 +193,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the Arc-enabled clusters. You can choose any of the clusters to test against.
+Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
 ### AKS/GKE
 
@@ -250,6 +252,7 @@ If you enabled k3d, EKS or GKE clusters, run the following commands:
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true"
+  ```
 
 ### Extra Clusters
 

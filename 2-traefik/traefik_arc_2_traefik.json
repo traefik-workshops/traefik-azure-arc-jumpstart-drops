@@ -18,14 +18,13 @@
   "Products": [
     "Arc-enabled Kubernetes",
     "Traefik",
-    "API Gateway"
+    "Ingress Controller"
   ],
   "LastModified": "2025-05-27T00:00:00.000Z",
   "CreatedDate": "2025-05-15T00:00:00.000Z",
   "Topics": [
-    "Ingress Management",
-    "API Management",
-    "API Gateway",
+    "Kubernetes Ingress",
+    "Ingress Controller",
     "Traefik",
     "Traefik Proxy",
     "Kubernetes"

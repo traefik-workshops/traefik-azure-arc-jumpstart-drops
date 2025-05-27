@@ -6,8 +6,6 @@ This drop demonstrates how to enable OAuth2 with Traefik and Microsoft Entra ID 
 
 Traefik can support any Oauth2.0 compliant Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
-The terraform script will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik. 
-
 ## Prerequisites
 
 * [Install or update Azure CLI to version 2.65.0 and above](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest). Use the below command to check your current installed version.
@@ -99,7 +97,7 @@ The terraform script will create a Microsoft Entra ID application and a group fo
 
 ## Getting Started
 
-You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow this guide to grab the license key for each cluster: [here](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin).
+You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow [this](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin) guide to grab the license key for each cluster.
 
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
@@ -131,15 +129,17 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true" \
-    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
-    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
     -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
     -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
 
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
+
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the Arc-enabled clusters. You can choose any of the clusters to test against.
+Verify that Traefik Airlines applications are exposed and secured through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
@@ -210,10 +210,11 @@ If you enabled k3d, EKS or GKE clusters, run the following commands:
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true" \
-    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
-    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
     -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
     -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
+  ```
 
 ### Extra Clusters
 

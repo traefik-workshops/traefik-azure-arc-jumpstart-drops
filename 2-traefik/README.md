@@ -2,7 +2,15 @@
 
 ## Overview
 
-This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled Kubernetes clusters using Terraform and ARM templates. Traefik is a leading modern open source reverse proxy and ingress controller that makes deploying services and APIs easy. Traefik integrates with your existing infrastructure components and configures itself automatically and dynamically.
+This drop demonstrates how to deploy Traefik Proxy for Azure Arc to Arc-enabled Kubernetes clusters using Terraform and ARM templates. 
+
+Traefik is an open-source Application Proxy that makes publishing your services a fun and easy experience. It receives requests on behalf of your system, identifies which components are responsible for handling them, and routes them securely.
+
+What sets Traefik apart, besides its many features, is that it automatically discovers the right configuration for your services. The magic happens when Traefik inspects your infrastructure, where it finds relevant information and discovers which service serves which request.
+
+Traefik is natively compliant with every major cluster technology, such as Kubernetes, Docker Swarm, AWS, and the [list goes on](https://doc.traefik.io/traefik/reference/install-configuration/providers/overview/); and can handle many at the same time. (It even works for legacy software running on bare metal.)
+
+With Traefik, there is no need to maintain and synchronize a separate configuration file: everything happens automatically, in real time (no restarts, no connection interruptions). With Traefik, you spend time developing and deploying new features to your system, not on configuring and maintaining its working state.
 
 ## Prerequisites
 
@@ -133,6 +141,8 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
     -var="enableEKS=true"
   ```
 
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
+
 ## Testing
 
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
@@ -146,7 +156,7 @@ Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
 You can now view your Traefik dashboard locally at [http://dashboard.traefik.localhost:8080](http://dashboard.traefik.localhost:8080) if you enabled the k3d cluster.
 
-If you would like to view the Traefik dashboard on the rest Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
+If you would like to view the Traefik dashboard on the rest of the Arc-enabled Kubernetes clusters you can run the following command to update your `/etc/hosts` file with the Arc-enabled Kubernetes cluster IP addresses and demo domain names:
 
   ```shell
   sudo ./2-traefik/update_hosts.sh
@@ -180,7 +190,7 @@ You can now view your Traefik dashboard on the rest Arc-enabled Kubernetes clust
 
 ## ARM Template Example
 
-To be able to deploy Arc specific marketplace applications with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure portal when reviewing the marketplace application install, and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [traefik.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/traefik.tf) file shows an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
+To be able to deploy Arc specific marketplace applications with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure Marketplace portal when reviewing the marketplace application install, and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [traefik.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/traefik.tf) file is an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
 
   ```hcl
   resource "azurerm_resource_group_template_deployment" "traefik" {

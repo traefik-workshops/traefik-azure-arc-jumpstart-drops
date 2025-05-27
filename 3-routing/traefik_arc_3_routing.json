@@ -25,12 +25,11 @@
   "Topics": [
     "Routing",
     "Traefik",
+    "Traefik Proxy",
     "Service Discovery",
     "Load Balancing",
     "FluxCD",
     "Terraform",
-    "API Gateway",
-    "API Management",
     "Cluster Management",
     "Infrastructure as Code"
   ]
