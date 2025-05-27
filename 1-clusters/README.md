@@ -185,12 +185,12 @@ Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, 
 Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup under [clusters.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/clusters.tf).
 
   ```hcl
-  resource "null_resource" "arc_k3d_cluster" {
+  resource "null_resource" "arc_aks_cluster" {
     provisioner "local-exec" {
       command = <<EOT
         az connectedk8s connect \
-          --kube-context ${local.k3d_cluster_name} \
-          --name "arc-${local.k3d_cluster_name}" \
+          --kube-context ${local.aks_cluster_name} \
+          --name "arc-${local.aks_cluster_name}" \
           --resource-group ${azurerm_resource_group.traefik_demo.name}
       EOT
     }
@@ -199,15 +199,15 @@ Connecting Kubernetes clusters to Azure Arc is only possible through the Azure C
       when = destroy
       command = <<EOT
         az connectedk8s delete --force --yes \
-          --name "arc-k3d-traefik-demo" \
+          --name "arc-aks-traefik-demo" \
           --resource-group "traefik-demo"
 
-        kubectl config delete-context "k3d-traefik-demo" 2>/dev/null || true
+        kubectl config delete-context "aks-traefik-demo" 2>/dev/null || true
       EOT
     }
 
-    count      = var.enableK3D ? 1 : 0
-    depends_on = [ module.k3d ]
+    count      = var.enableAKS ? 1 : 0
+    depends_on = [ module.aks ]
   }
   ```
 

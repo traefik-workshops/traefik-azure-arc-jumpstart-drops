@@ -14,6 +14,8 @@ module "aks" {
   cluster_location     = var.aksClusterLocation
   cluster_machine_type = var.aksClusterMachineType
   cluster_node_count   = var.aksClusterNodeCount
+
+  count = var.enableAKS ? 1 : 0
 }
 
 resource "null_resource" "arc_aks_cluster" {

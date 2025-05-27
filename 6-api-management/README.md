@@ -219,7 +219,9 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubManagement=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
 If you enabled k3d, EKS or GKE clusters, run the following commands:
@@ -228,9 +230,14 @@ If you enabled k3d, EKS or GKE clusters, run the following commands:
   terraform destroy \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubManagement=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
 
 ### Extra Clusters
 

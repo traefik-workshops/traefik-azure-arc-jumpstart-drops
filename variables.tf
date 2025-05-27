@@ -16,7 +16,7 @@ variable "enableTraefikAirlinesTLS" {
   default     = true
 }
 
-variable "enableTraefikAirlinesHubGateway" {
+variable "enableTraefikHubGateway" {
   type        = bool
   description = "Enable Traefik Airlines Hub Gateway"
   default     = false
@@ -34,7 +34,7 @@ variable "traefikHubAKSLicenseKey" {
   default     = ""
 
   validation {
-    condition     = !((var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement) && var.enableAKS && var.traefikHubAKSLicenseKey == "")
+    condition     = !((var.enableTraefikHubGateway || var.enableTraefikHubManagement) && var.enableAKS && var.traefikHubAKSLicenseKey == "")
     error_message = "Traefik Hub license key is required when Traefik Hub is enabled and AKS is enabled"
   }
 }
@@ -45,7 +45,7 @@ variable "traefikHubK3DLicenseKey" {
   default     = ""
 
   validation {
-    condition     = !((var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement) && var.enableK3D && var.traefikHubK3DLicenseKey == "")
+    condition     = !((var.enableTraefikHubGateway || var.enableTraefikHubManagement) && var.enableK3D && var.traefikHubK3DLicenseKey == "")
     error_message = "Traefik Hub license key is required when Traefik Hub is enabled and K3D is enabled"
   }
 }
@@ -56,7 +56,7 @@ variable "traefikHubEKSLicenseKey" {
   default     = ""
 
   validation {
-    condition     = !((var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement) && var.enableEKS && var.traefikHubEKSLicenseKey == "")
+    condition     = !((var.enableTraefikHubGateway || var.enableTraefikHubManagement) && var.enableEKS && var.traefikHubEKSLicenseKey == "")
     error_message = "Traefik Hub license key is required when Traefik Hub is enabled and EKS is enabled"
   }
 }
@@ -67,7 +67,7 @@ variable "traefikHubGKELicenseKey" {
   default     = ""
 
   validation {
-    condition     = !((var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement) && var.enableGKE && var.traefikHubGKELicenseKey == "")
+    condition     = !((var.enableTraefikHubGateway || var.enableTraefikHubManagement) && var.enableGKE && var.traefikHubGKELicenseKey == "")
     error_message = "Traefik Hub license key is required when Traefik Hub is enabled and GKE is enabled"
   }
 }

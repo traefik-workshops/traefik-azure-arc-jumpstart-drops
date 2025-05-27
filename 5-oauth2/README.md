@@ -114,8 +114,7 @@ Upgrade Traefik Proxy to Traefik Hub Gateway and deploy Traefik API CRDs to mana
   terraform init
   terraform apply \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
-    -var="enableTraefikHub=true" \
-    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableTraefikHubGateway=true" \
     -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
@@ -128,7 +127,7 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableTraefikHub=true" \
-    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableTraefikHubGateway=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true" \
@@ -197,7 +196,7 @@ To remove the Arc-enabled clusters, run the following commands:
   ```shell
   terraform destroy \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
-    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableTraefikHubGateway=true" \
     -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
@@ -207,7 +206,7 @@ If you enabled k3d, EKS or GKE clusters, run the following commands:
   terraform destroy \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
-    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableTraefikHubGateway=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true" \

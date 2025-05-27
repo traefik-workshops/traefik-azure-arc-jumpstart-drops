@@ -7,7 +7,7 @@ locals {
   gke = var.enableGKE ? ["gke"] : []
   clusters = toset(concat(local.aks, local.k3d, local.eks, local.gke))
 
-  kustomizations_path = var.enableTraefikAirlinesHubGateway ? "gateway/security/jwt/entraID" : var.enableTraefikHubManagement ? "management/base" : "proxy/base"
+  kustomizations_path = var.enableTraefikHubGateway ? "gateway/security/jwt/entraID" : var.enableTraefikHubManagement ? "management/base" : "proxy/base"
 }
 
 provider "azurerm" {

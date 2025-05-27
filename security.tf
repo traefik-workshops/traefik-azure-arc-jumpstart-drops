@@ -3,24 +3,24 @@ module "entra_id" {
 
   users = [ "employee", "customer", "flight-staff", "ticket-agent" ]
 
-  count = var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? 1 : 0
+  count = var.enableTraefikHubGateway || var.enableTraefikHubManagement ? 1 : 0
 }
 
 output "entraIDTenantID" {
   sensitive = true
-  value     = module.entra_id[0].tenant_id
+  value     = var.enableTraefikHubGateway || var.enableTraefikHubManagement ? module.entra_id[0].tenant_id : null
 }
 
 output "entraIDApplicationClientID" {
   sensitive = true
-  value     = module.entra_id[0].application_client_id
+  value     = var.enableTraefikHubGateway || var.enableTraefikHubManagement ? module.entra_id[0].application_client_id : null
 }
 
 output "entraIDApplicationClientSecret" {
   sensitive = true
-  value     = module.entra_id[0].application_client_secret
+  value     = var.enableTraefikHubGateway || var.enableTraefikHubManagement ? module.entra_id[0].application_client_secret : null
 }
 
 output "entraIDUsers" {
-  value = module.entra_id[0].users
+  value = var.enableTraefikHubGateway || var.enableTraefikHubManagement ? module.entra_id[0].users : null
 }

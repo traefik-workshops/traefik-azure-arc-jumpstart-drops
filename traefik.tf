@@ -8,7 +8,7 @@ locals {
     "ports.traefik.expose.default": "true",
     "rbac.enabled": "true",
     "hub.apimanagement.enabled": var.enableTraefikHubManagement ? "true" : "false",
-    "versionOverride": var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? "v3.16.1" : "v3.4.0"
+    "versionOverride": var.enableTraefikHubGateway || var.enableTraefikHubManagement ? "v3.16.1" : "v3.4.0"
   }
 
   certificatesResolvers = var.enableTraefikAirlinesTLS ? {
@@ -21,20 +21,20 @@ locals {
 
   clusterSettings = {
     "aks" = {
-      "hub.token": "${var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? var.traefikHubAKSLicenseKey : ""}",
+      "hub.token": "${var.enableTraefikHubGateway || var.enableTraefikHubManagement ? var.traefikHubAKSLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.aks`)"
     }
     "k3d" = {
-      "hub.token": "${var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? var.traefikHubK3DLicenseKey : ""}",
+      "hub.token": "${var.enableTraefikHubGateway || var.enableTraefikHubManagement ? var.traefikHubK3DLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.k3d`) || Host(`dashboard.traefik.localhost`)"
     }
     "eks" = {
-      "hub.token": "${var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? var.traefikHubEKSLicenseKey : ""}",
+      "hub.token": "${var.enableTraefikHubGateway || var.enableTraefikHubManagement ? var.traefikHubEKSLicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.eks`)"
       "service.annotations.service\\.beta\\.kubernetes\\.io\\/aws-load-balancer-type" = "nlb"
     }
     "gke" = {
-      "hub.token": "${var.enableTraefikAirlinesHubGateway || var.enableTraefikHubManagement ? var.traefikHubGKELicenseKey : ""}",
+      "hub.token": "${var.enableTraefikHubGateway || var.enableTraefikHubManagement ? var.traefikHubGKELicenseKey : ""}",
       "ingressRoute.dashboard.matchRule": "Host(`dashboard.traefik.gke`)"
     }
   }
