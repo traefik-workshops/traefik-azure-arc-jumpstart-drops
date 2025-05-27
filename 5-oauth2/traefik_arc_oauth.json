@@ -9,7 +9,7 @@
         "Link": "https://www.linkedin.com/in/zalbiraw"
       }
     ],
-    "Source": "https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/4-tls",
+    "Source": "https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/5-oauth2",
     "Type": "script_automation",
     "Difficulty": "Medium",
     "ProgrammingLanguage": [
@@ -24,15 +24,11 @@
     "CreatedDate": "2025-05-15T20:34:24.000Z",
     "Topics": [
       "Security",
-      "TLS/SSL",
-      "Certificate Management",
-      "Encryption",
       "Traefik",
-      "Traefik Proxy",
+      "Traefik Gateway",
       "OAuth2.0",
       "Terraform",
       "API Gateway",
-      "API Management",
       "Infrastructure as Code"
     ]
 }
