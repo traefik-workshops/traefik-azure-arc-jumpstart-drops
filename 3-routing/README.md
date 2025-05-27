@@ -147,8 +147,8 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
 
   ```shell
-  k3d_address="localhost:8000"
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  k3d_address="localhost:8000"
   eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
   gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
   ```
@@ -157,12 +157,12 @@ Verify that Traefik Airlines applications are exposed through Traefik through th
 
   Customers service:
   ```shell
-  curl http://$k3d_address -H "Host: customers.traefik-airlines"
+  curl http://$aks_address -H "Host: customers.traefik-airlines"
   ```
 
   Employees service:
   ```shell
-  curl http://$aks_address -H "Host: employees.traefik-airlines"
+  curl http://$k3d_address -H "Host: employees.traefik-airlines"
   ```
 
   Flights service:
@@ -238,3 +238,4 @@ If you want to destroy the extra clusters, run the following commands:
   ```shell
   terraform -chdir=./1-clusters/gke destroy \
     -var="googleProjectId=$(gcloud config get-value project)"
+  ```

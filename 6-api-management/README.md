@@ -1,21 +1,12 @@
-# Secure Traefik Airlines application using Let's Encrypt and Traefik automated certificate management
+# Multi-cluster API Management with Traefik Hub
 
 ## Overview
 
-This drop demonstrates how to enable automatic HTTPS for your services using Traefik's Let's Encrypt integration.
+This drop demonstrates how to enable API management with Traefik Hub to manage and secure your applications. It extends the previous drops by adding API management capabilities to the Traefik Airlines application.
 
-### TLS Configuration
+Traefik can support any Oauth2.0 compliant Identity Provider or you can use Traefik Hub Managements OOTB Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
-The deployment configures Traefik with:
-
-- **Automatic Certificate Management**: Using Let's Encrypt to automatically generate and renew certificates
-- **HTTP Challenge**: For domain ownership verification
-- **Wildcard Domains**: Using sslip.io for easy testing
-
-### Important Notes
-
-- AKS/EKS/GKE clusters support Let's Encrypt integration but k3d does not as it requires a public IP
-- Certificates are automatically stored and renewed by Traefik
+The terraform scirpt will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik.
 
 ## Prerequisites
 
@@ -108,22 +99,24 @@ The deployment configures Traefik with:
 
 ## Getting Started
 
+You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). You you have please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow this guide to grab the license key for each cluster: [here](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin).
+
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Update Traefik configuration to handle Let's Encrypt certificates:
+Upgrade Traefik Proxy to Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubManagement=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
-
-  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
 
 You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
@@ -133,103 +126,91 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
   terraform apply \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubManagement=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
 
-Deploy TLS enabled routes to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-tls.sh` script to deploy the TLS enabled routes to all clusters.
-
-### AKS
+Finally, update the Traefik Hub Management gateway access settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
 
   ```shell
-  aks_ip="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/traefik-airlines-tls.yaml" | \
-  kubectl apply \
-    --namespace "traefik-airlines" \
-    --context "aks-traefik-demo" -f -;
+  echo login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/discovery/v2.0/keys
   ```
 
-### AKS/EKS/GKE
-
-  ```shell
-  ./4-acme-tls/deploy-tls.sh
-  ```
-
-  Example output:
-
-  ```shell
-  Processing aks...
-  Deploying TLS resources to aks-traefik-demo with IP/hostname: 20.245.254.148
-  Deploying with IP 20.245.254.148
-  ingressroute.traefik.io/customers-ingress-secure created
-  ingressroute.traefik.io/employees-ingress-secure created
-  ingressroute.traefik.io/flights-ingress-secure created
-  ingressroute.traefik.io/tickets-ingress-secure created
-  Processing eks...
-  Deploying TLS resources to eks-traefik-demo with IP/hostname: a2f9aea9f80644d1fbfdd69a2f8e19e1-67ea3e06c2d7552c.elb.us-west-1.amazonaws.com
-  Resolving EKS hostname to IP...
-  Deploying with IP 184.169.136.137 (0)
-  ingressroute.traefik.io/customers-ingress-secure-0 created
-  ingressroute.traefik.io/employees-ingress-secure-0 created
-  ingressroute.traefik.io/flights-ingress-secure-0 created
-  ingressroute.traefik.io/tickets-ingress-secure-0 created
-  Deploying with IP 52.8.123.158 (1)
-  ingressroute.traefik.io/customers-ingress-secure-1 created
-  ingressroute.traefik.io/employees-ingress-secure-1 created
-  ingressroute.traefik.io/flights-ingress-secure-1 created
-  ingressroute.traefik.io/tickets-ingress-secure-1 created
-  Processing gke...
-  Deploying TLS resources to gke-traefik-demo with IP/hostname: 34.106.133.173
-  Deploying with IP 34.106.133.173
-  ingressroute.traefik.io/customers-ingress-secure created
-  ingressroute.traefik.io/employees-ingress-secure created
-  ingressroute.traefik.io/flights-ingress-secure created
-  ingressroute.traefik.io/tickets-ingress-secure created
-  TLS resources deployment completed.
-  ```
+![auth-settings-jwt](./media/auth-settings-jwt.png)
 
 ## Testing
 
 Verify that Traefik Airlines applications are exposed through Traefik through the Arc-enabled clusters. You can choose any of the clusters to test against.
 
-### AKS/GKE
-
   ```shell
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  k3d_address="localhost:8000"
+  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
   gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
   ```
 
-### EKS
+### Generate JWT token
+
+Before you generate a JWT token, you must login with the user that you are generating a token for and consent to the application permissions.
 
   ```shell
-  eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
-  eks_address_0=$(echo $eks_ips | sed -n 1p)
-  eks_address_1=$(echo $eks_ips | sed -n 2p)
+  username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
+  echo $username
+  ```
+
+Consent link:
+
+```shell
+echo "https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/authorize?client_id=$(terraform output -raw entraIDApplicationClientID)&response_type=code&response_mode=query&scope=User.Read&prompt=consent"
+```
+
+Visit [https://login.microsoftonline.com](https://login.microsoftonline.com) and login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
+
+  ```shell
+  access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+    https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/token \
+    -d "client_id=$(terraform output -raw entraIDApplicationClientID)" \
+    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" \
+    -d "scope=$(terraform output -raw entraIDApplicationClientID)/.default" \
+    -d "grant_type=password" \
+    -d "username=$username" \
+    -d "password=topsecretpassword" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+  ```
+
+  Verify that you obtained the access token correctly:
+
+  ```shell
+  echo $access_token
   ```
 
 ### Customers service
 
   ```shell
-  curl https://customers.traefik-airlines.${aks_address}.sslip.io
+  curl -v http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl https://employees.traefik-airlines.${gke_address}.sslip.io
+  curl -v http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl https://flights.traefik-airlines.${eks_address_0}.sslip.io
+  curl -v http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl https://tickets.traefik-airlines.${eks_address_1}.sslip.io
+  curl -v http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown

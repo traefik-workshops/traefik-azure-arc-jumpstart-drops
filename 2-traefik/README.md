@@ -138,8 +138,8 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 Verify that Traefik was installed on both Azure Arc-enabled Kubernetes clusters:
 
   ```shell
-  az connectedk8s show --name arc-k3d-traefik-demo --resource-group traefik-demo
   az connectedk8s show --name arc-aks-traefik-demo --resource-group traefik-demo
+  az connectedk8s show --name arc-k3d-traefik-demo --resource-group traefik-demo
   az connectedk8s show --name arc-eks-traefik-demo --resource-group traefik-demo
   az connectedk8s show --name arc-gke-traefik-demo --resource-group traefik-demo
   ```
@@ -266,3 +266,4 @@ If you want to destroy the extra clusters, run the following commands:
   ```shell
   terraform -chdir=./1-clusters/gke destroy \
     -var="googleProjectId=$(gcloud config get-value project)"
+  ```

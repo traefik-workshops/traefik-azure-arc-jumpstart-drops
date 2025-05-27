@@ -1,8 +1,12 @@
-# Multi-cluster API Management with Traefik Hub
+# Multi-cluster application security with OAuth2, Microsoft Entra ID and Traefik
 
 ## Overview
 
-This drop demonstrates how to enable automatic HTTPS for your services using Traefik's Let's Encrypt integration.
+This drop demonstrates how to enable OAuth2 with Traefik and Microsoft Entra ID to manage and secure your applications. It extends the previous drops by adding application security capabilities to the Traefik Airlines application.
+
+Traefik can support any Oauth2.0 compliant Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
+
+The terraform scirpt will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik. 
 
 ## Prerequisites
 
@@ -103,27 +107,29 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Update Traefik configuration to handle Let's Encrypt certificates:
+Upgrade Traefik Proxy to Traefik Hub Gateway and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="5-api-management/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
-    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
-    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>"
+    -var="enableTraefikHub=true" \
+    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
-You can also enable the install on EKS and GKE clusters as well using Terraform:
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="5-api-management/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHub=true" \
+    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
     -var="enableEKS=true" \
     -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
@@ -131,50 +137,57 @@ You can also enable the install on EKS and GKE clusters as well using Terraform:
     -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
     -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
-  > **Note:** Make sure to copy the `extensions/eks.tf` and `extensions/gke.tf` files to the main directory if you are looking to use the EKS and GKE clusters.
 
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik through the k3d and AKS clusters. You can choose any of the clusters to test against.
-
-### AKS/GKE
+Verify that Traefik Airlines applications are exposed through Traefik through the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
   aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  k3d_address="localhost:8000"
+  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
   gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
   ```
 
-### EKS
+### Generate JWT token
 
   ```shell
-  eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
-  eks_address_0=$(echo $eks_ips | sed -n 1p)
-  eks_address_1=$(echo $eks_ips | sed -n 2p)
+  access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+    https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/token \
+    -d "client_id=$(terraform output -raw entraIDApplicationClientID)" \
+    -d 'grant_type=client_credentials' \
+    -d "scope=$(terraform output -raw entraIDApplicationClientID)/.default" \
+    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+  ```
 
+  Verify that you obtained the access token correctly:
+
+  ```shell
+  echo $access_token
   ```
 
 ### Customers service
 
   ```shell
-  curl https://customers.traefik-airlines.${aks_address}.sslip.io
+  curl -v http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl https://employees.traefik-airlines.${gke_address}.sslip.io
+  curl -v http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl https://flights.traefik-airlines.${eks_address_0}.sslip.io
+  curl -v http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl https://tickets.traefik-airlines.${eks_address_0}.sslip.io
+  curl -v http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown
@@ -183,16 +196,45 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="4-tls/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
-If you enabled EKS and GKE clusters, run the following commands:
+If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="4-tls/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikAirlinesHubGateway=true" \
+    -var="enableK3D=true" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
+
+### Extra Clusters
+
+If you want to destroy the extra clusters, run the following commands:
+
+#### k3d
+
+  ```shell
+  terraform -chdir=./1-clusters/k3d destroy
+  ```
+
+#### EKS
+
+  ```shell
+  terraform -chdir=./1-clusters/eks destroy
+  ```
+
+#### GKE
+
+  ```shell
+  terraform -chdir=./1-clusters/gke destroy \
+    -var="googleProjectId=$(gcloud config get-value project)"
+  ```
