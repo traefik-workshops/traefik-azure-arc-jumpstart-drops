@@ -7,7 +7,7 @@ locals {
   gke = var.enableGKE ? ["gke"] : []
   clusters = toset(concat(local.aks, local.k3d, local.eks, local.gke))
 
-  kustomizations_path = var.enableTraefikHubGateway ? "gateway/security/jwt/entraID" : var.enableTraefikHubManagement ? "management/base" : "proxy/base"
+  kustomizations_path = var.enableTraefikHubGateway ? "gateway/security/jwt/entraID" : var.enableTraefikHubManagement ? "management" : "proxy/base"
 }
 
 provider "azurerm" {
@@ -45,12 +45,18 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
   git_repository {
     url = "https://github.com/traefik-workshops/traefik-airlines.git"
     reference_type = "tag"
-    reference_value = "v0.0.13"
+    reference_value = "v0.0.17"
   }
 
   kustomizations {
-    name = "traefik-airlines"
-    path = local.kustomizations_path
+    name                       = "traefik-airlines"
+    path                       = local.kustomizations_path
+    depends_on                 = []
+    garbage_collection_enabled = false
+    recreating_enabled         = false
+    retry_interval_in_seconds  = 600
+    sync_interval_in_seconds   = 600
+    timeout_in_seconds         = 600
   }
 
   for_each   = var.enableTraefikAirlines ? local.clusters : []

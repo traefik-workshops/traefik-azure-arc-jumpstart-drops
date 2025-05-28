@@ -138,85 +138,79 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 
   > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
 
-Finally, update the Traefik Hub Management gateway access settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
+### Traefik Custom Resource Definitions (CRDs)
+
+Traefik will utilize the following CRDs to manage your API resources across the Arc-enabled clusters:
+  
+#### API CRDs
+
+Please refer to the [API CRDs](https://doc.traefik.io/traefik-hub/api-management/api) documentation for more information.
+
+#### API Plan CRDs
+
+Please refer to the [API Plan CRDs](https://doc.traefik.io/traefik-hub/api-management/api-plans) documentation for more information.
+
+#### API Catalog Item CRDs
+
+Please refer to the [API Catalog Item CRDs](https://doc.traefik.io/traefik-hub/api-management/api-catalogitem) documentation for more information.
+
+### Testing
+
+Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed to the `traefik-airlines` namespace.
+
+### API CRDs
 
   ```shell
-  echo login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/discovery/v2.0/keys
+  kubectl get apis --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-![auth-settings-jwt](./media/auth-settings-jwt.png)
-
-## Testing
-
-Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
+  Output will look like this:
 
   ```shell
-  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  k3d_address="localhost:8000"
-  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
-  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  NAME            AGE
+  customers-api   13m
+  employees-api   13m
+  flights-api     13m
+  tickets-api     13m
   ```
 
-### Generate JWT token
-
-Before you generate a JWT token, you must login with the user that you are generating a token for and consent to the application permissions.
-
-First, get the username:
+### API Plan CRDs
 
   ```shell
-  username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
-  echo $username
+  kubectl get apiplans --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-Secondly, get the consent link:
-
-```shell
-echo "https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/authorize?client_id=$(terraform output -raw entraIDApplicationClientID)&response_type=code&response_mode=query&scope=User.Read&prompt=consent"
-```
-
-Use the consent link to login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
-
-  > **Note:** The consent flow will give an error at end of the flow, but the consent will be submitted successfully.
+  Output will look like this:
 
   ```shell
-  access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
-    https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/token \
-    -d "client_id=$(terraform output -raw entraIDApplicationClientID)" \
-    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" \
-    -d "scope=$(terraform output -raw entraIDApplicationClientID)/.default" \
-    -d "grant_type=password" \
-    -d "username=$username" \
-    -d "password=topsecretpassword" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+  NAME                             AGE
+  traefik-airlines-bronze-plan     13m
+  traefik-airlines-gold-plan       13m
+  traefik-airlines-platinum-plan   13m
+  traefik-airlines-silver-plan     13m
   ```
 
-  Verify that you obtained the access token correctly:
+### API Catalog Item CRDs
 
   ```shell
-  echo $access_token
+  kubectl get apicatalogitems --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-### Customers service
+  Output will look like this:
 
   ```shell
-  curl -v http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
-  ```
-
-### Employees service
-
-  ```shell
-  curl -v http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
-  ```
-
-### Flights service
-
-  ```shell
-  curl -v http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
-  ```
-
-### Tickets service
-
-  ```shell
-  curl -v http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
+  NAME                             AGE
+  traefik-airlines-customers       13m
+  traefik-airlines-employees       13m
   ```
 
 ## Teardown

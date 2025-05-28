@@ -107,7 +107,7 @@ Clone the Traefik Azure Arc Jumpstart GitHub repository
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Upgrade Traefik Proxy to Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
+Install Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
@@ -138,7 +138,47 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 
   > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
 
-Finally, update the Traefik Hub Management gateway access settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
+### Traefik Developer Portal SSO and API AuthN/AuthZ through Microsoft Entra ID
+
+Traefik Hub Management has its own Oauth2.0 compliant Identity Provider builtin for user mangement and API AuthN/AuthZ. However, it can also integrate with any Oauth2.0 compliant Identity Provider. In this example, we will use Microsoft Entra ID as the Identity Provider.
+
+To enable SSO and API AuthN/AuthZ through Microsoft Entra ID, we will need to update the [Auth Settings](https://hub.traefik.io/auth-settings) in the Traefik Hub Management console.
+
+Under the portal section, select OIDC and provide the identity provider details. 
+
+Issuer URL:
+```bash
+echo login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/v2.0
+```
+
+Client ID:
+```bash
+terraform output -raw entraIDApplicationClientID
+```
+
+Client Secret:
+```bash
+terraform output -raw entraIDApplicationClientSecret
+```
+
+Scopes:
+```bash
+openid email profile
+```
+
+Portal Claim Mapping:
+```text
+Groups: roles
+User ID: sub
+User email: email
+User first name: name
+User last name: 
+User company: 
+```
+
+![auth-settings-oidc](./media/auth-settings-oidc.png)
+
+First, update the Traefik Hub Management gateway access settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
 
   ```shell
   echo login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/discovery/v2.0/keys
@@ -161,18 +201,22 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 
 Before you generate a JWT token, you must login with the user that you are generating a token for and consent to the application permissions.
 
+First, get the username:
+
   ```shell
   username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
   echo $username
   ```
 
-Consent link:
+Secondly, get the consent link:
 
 ```shell
 echo "https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/authorize?client_id=$(terraform output -raw entraIDApplicationClientID)&response_type=code&response_mode=query&scope=User.Read&prompt=consent"
 ```
 
-Visit [https://login.microsoftonline.com](https://login.microsoftonline.com) and login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
+Use the consent link to login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
+
+  > **Note:** The consent flow will give an error at end of the flow, but the consent will be submitted successfully.
 
   ```shell
   access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
