@@ -1,61 +1,44 @@
 #!/bin/bash
 set -e
 
-# Function to deploy portal
+# Function to deploy Portal resources
 deploy_portal() {
     local context=$1
     local ip=$2
     local namespace="traefik-airlines"
-    local manifest="$(dirname "$0")/resources/traefik-airlines-portal.yaml"
+    local manifest="$(dirname "$0")/resources/portal.yaml"
 
     echo "Deploying Portal resources to $context with IP: $ip"
-    
-    # For EKS, we need to handle multiple IPs
-    if [[ "$context" == *"eks"* ]]; then
-        echo "Processing EKS IPs: $ip"
-        IFS=',' read -r -a resolved_ips <<< "$ip"
-        
-        # Deploy for each resolved IP
-        for i in "${!resolved_ips[@]}"; do
-            current_ip="${resolved_ips[$i]}"
-            echo "Deploying with IP $current_ip (${i})"
-            sed "s/EXTERNAL_IP/$current_ip/g" "$manifest" | \
-            sed "s/name: \"\(.*-ingress-secure\)\"/name: \"\\1-${i}\"/" | \
-            kubectl apply --namespace "$namespace" --context "$context" -f -
-        done
-    else
-        # For AKS and GKE, use the IP directly
-        echo "Deploying with IP $ip"
-        sed "s/EXTERNAL_IP/$ip/g" "$manifest" | \
-        kubectl apply --namespace "$namespace" --context "$context" -f -
-    fi
+    sed "s/EXTERNAL_IP/$ip/g" "$manifest" | \
+    kubectl apply --namespace "$namespace" --context "$context" -f -
 }
 
-# Get IPs from Terraform
-echo "Fetching IPs from Terraform..."
-cd "$(dirname "$0")/.."  # Navigate to root directory if needed
+# Get IPs from Terraform outputs
+echo "Getting IPs from Terraform outputs..."
+AKS_IP=$(terraform output -raw traefikAKSIP 2>/dev/null || true)
+EKS_IP=$(terraform output -raw traefikEKSIP 2>/dev/null || true)
+GKE_IP=$(terraform output -raw traefikGKEIP 2>/dev/null || true)
 
-# Check for each cloud provider's context and deploy
-for provider in aks eks gke; do
-    context="${provider}-traefik-demo"
-    
-    # Check if context exists
-    if ! kubectl config get-contexts "$context" &>/dev/null; then
-        echo "Context $context not found, skipping..."
-        continue
-    fi
+# Check for each cloud provider and deploy
+if [ -n "$AKS_IP" ]; then
+    echo "Processing AKS..."
+    deploy_portal "aks-traefik-demo" "$AKS_IP"
+else
+    echo "WARNING: Could not get AKS IP from Terraform output"
+fi
 
-    echo "Processing $provider..."
-    
-    # Get IP from Terraform output
-    ip_output=$(terraform output -raw "${provider}_traefik_ips" 2>/dev/null || true)
+if [ -n "$EKS_IP" ]; then
+    echo "Processing EKS..."
+    deploy_portal "eks-traefik-demo" "$EKS_IP"
+else
+    echo "WARNING: Could not get EKS IP from Terraform output"
+fi
 
-    if [ -z "$ip_output" ]; then
-        echo "WARNING: Could not get IP for $provider from Terraform, skipping..."
-        continue
-    fi
+if [ -n "$GKE_IP" ]; then
+    echo "Processing GKE..."
+    deploy_portal "gke-traefik-demo" "$GKE_IP"
+else
+    echo "WARNING: Could not get GKE IP from Terraform output"
+fi
 
-    deploy_portal "$context" "$ip_output"
-done
-
-echo "Portal deployment completed."
+echo "Portal resources deployment completed."

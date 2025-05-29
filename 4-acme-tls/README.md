@@ -161,29 +161,20 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
   Example output:
 
   ```shell
-  Processing aks...
-  Deploying TLS resources to aks-traefik-demo with IP/hostname: 20.245.254.148
-  Deploying with IP 20.245.254.148
+  Processing AKS...
+  Deploying TLS resources to aks-traefik-demo with IP: 40.125.40.112
   ingressroute.traefik.io/customers-ingress-secure created
   ingressroute.traefik.io/employees-ingress-secure created
   ingressroute.traefik.io/flights-ingress-secure created
   ingressroute.traefik.io/tickets-ingress-secure created
-  Processing eks...
-  Deploying TLS resources to eks-traefik-demo with IP/hostname: a2f9aea9f80644d1fbfdd69a2f8e19e1-67ea3e06c2d7552c.elb.us-west-1.amazonaws.com
-  Resolving EKS hostname to IP...
-  Deploying with IP 184.169.136.137 (0)
-  ingressroute.traefik.io/customers-ingress-secure-0 created
-  ingressroute.traefik.io/employees-ingress-secure-0 created
-  ingressroute.traefik.io/flights-ingress-secure-0 created
-  ingressroute.traefik.io/tickets-ingress-secure-0 created
-  Deploying with IP 52.8.123.158 (1)
-  ingressroute.traefik.io/customers-ingress-secure-1 created
-  ingressroute.traefik.io/employees-ingress-secure-1 created
-  ingressroute.traefik.io/flights-ingress-secure-1 created
-  ingressroute.traefik.io/tickets-ingress-secure-1 created
-  Processing gke...
-  Deploying TLS resources to gke-traefik-demo with IP/hostname: 34.106.133.173
-  Deploying with IP 34.106.133.173
+  Processing EKS...
+  Deploying TLS resources to eks-traefik-demo with IP: 54.67.105.168
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  Processing GKE...
+  Deploying TLS resources to gke-traefik-demo with IP: 34.106.210.103
   ingressroute.traefik.io/customers-ingress-secure created
   ingressroute.traefik.io/employees-ingress-secure created
   ingressroute.traefik.io/flights-ingress-secure created
