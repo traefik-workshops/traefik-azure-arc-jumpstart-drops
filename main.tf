@@ -9,7 +9,7 @@ locals {
 
   kustomizations_path = var.enableTraefikHubGateway ? "gateway/security/jwt/entraID" : var.enableTraefikHubManagement ? "management" : "proxy/base"
 
-  traefikAirlineVersion = "v0.0.29"
+  traefikAirlineVersion = "v0.0.30"
 }
 
 provider "azurerm" {

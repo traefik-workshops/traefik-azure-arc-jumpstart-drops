@@ -263,7 +263,7 @@ You can now access the portal on the Arc-enabled Kubernetes clusters with public
   echo "https://portal.traefik-airlines.${gke_address}.sslip.io"
   ```
 
-Lastly, create an application inside the Traefik Developer Portal with the same name as your user, for example, `customer`.
+Last, you can access the Traefik Developer Portal at the above URL and create an application and checkout any API from the catalog. Or you can set the Application ID to `customers` or `employees` to access the managed subscriptions created in the previous drop.
 
 ## Testing
 

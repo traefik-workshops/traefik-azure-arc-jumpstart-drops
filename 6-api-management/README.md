@@ -171,10 +171,10 @@ Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed 
 
   ```shell
   NAME            AGE
-  customers-api   13m10s
-  employees-api   13m10s
-  flights-api     13m10s
-  tickets-api     13m10s
+  customers-api   10m
+  employees-api   10m
+  flights-api     10m
+  tickets-api     10m
   ```
 
 ### API Plan CRDs
@@ -190,10 +190,10 @@ Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed 
 
   ```shell
   NAME                             AGE
-  traefik-airlines-bronze-plan     13m10s
-  traefik-airlines-gold-plan       13m10s
-  traefik-airlines-platinum-plan   13m10s
-  traefik-airlines-silver-plan     13m10s
+  traefik-airlines-bronze-plan     10m
+  traefik-airlines-gold-plan       10m
+  traefik-airlines-platinum-plan   10m
+  traefik-airlines-silver-plan     10m
   ```
 
 ### API Catalog Item CRDs
@@ -209,8 +209,8 @@ Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed 
 
   ```shell
   NAME                             AGE
-  traefik-airlines-customers       13m10s
-  traefik-airlines-employees       13m10s
+  traefik-airlines-customers       10m
+  traefik-airlines-employees       10m
   ```
 
 ## Teardown
