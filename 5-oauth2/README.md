@@ -124,7 +124,6 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
   terraform apply \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
-    -var="enableTraefikHub=true" \
     -var="enableTraefikHubGateway=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
@@ -142,21 +141,21 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 Verify that Traefik Airlines applications are exposed and secured through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
-  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  aks_address="$(terraform output -raw traefikAKSIP)"
   k3d_address="localhost:8000"
-  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
-  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  eks_address="$(terraform output -raw traefikEKSIP)"
+  gke_address="$(terraform output -raw traefikGKEIP)"
   ```
 
 ### Generate JWT token
 
   ```shell
-  access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+  access_token="$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
     https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/token \
     -d "client_id=$(terraform output -raw entraIDApplicationClientID)" \
     -d 'grant_type=client_credentials' \
     -d "scope=$(terraform output -raw entraIDApplicationClientID)/.default" \
-    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)"
   ```
 
   Verify that you obtained the access token correctly:
@@ -168,25 +167,25 @@ Verify that Traefik Airlines applications are exposed and secured through Traefi
 ### Customers service
 
   ```shell
-  curl -v http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl -v http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl -v http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl -v http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown

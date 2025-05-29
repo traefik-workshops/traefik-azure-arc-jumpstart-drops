@@ -145,7 +145,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 ### AKS
 
   ```shell
-  aks_ip="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  aks_ip="$(terraform output -raw traefikAKSIP)"
   sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/traefik-airlines-tls.yaml" | \
   kubectl apply \
     --namespace "traefik-airlines" \
@@ -198,16 +198,15 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 ### AKS/GKE
 
   ```shell
-  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  aks_address=$(terraform output -raw traefikAKSIP)
+  gke_address=$(terraform output -raw traefikGKEIP)
   ```
 
 ### EKS
 
   ```shell
-  eks_ips=$(dig +short "$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')")
-  eks_address_0=$(echo $eks_ips | sed -n 1p)
-  eks_address_1=$(echo $eks_ips | sed -n 2p)
+  eks_address_0=$(terraform output -raw traefikEKSIP | awk -F',' '{print $1}')
+  eks_address_1=$(terraform output -raw traefikEKSIP | awk -F',' '{print $2}')
   ```
 
 ### Customers service

@@ -1,31 +1,23 @@
 #!/bin/bash
+set -e
 
-# Function to safely get service address
-get_service_address() {
-    local context=$1
-    local service_name=$2
-    local namespace=$3
+# Function to get IP from Terraform output
+get_tf_ip() {
+    local provider=$1
+    local ip_output
     
-    # Check if context exists and is accessible
-    if ! kubectl config get-contexts "$context" &>/dev/null; then
-        echo "Context $context not found, skipping..." >&2
+    if ip_output=$(cd "$(dirname "$0")/.." && terraform output -raw "${provider}_traefik_ips" 2>/dev/null); then
+        # For EKS, take the first IP if there are multiple
+        if [[ "$provider" == "eks" ]]; then
+            IFS=',' read -r -a ips <<< "$ip_output"
+            echo "${ips[0]}"  # Return first IP for EKS
+        else
+            echo "$ip_output"
+        fi
+    else
+        echo "Failed to get IP for $provider from Terraform" >&2
         return 1
     fi
-    
-    # Try to get the service IP/hostname
-    local output
-    if ! output=$(kubectl --context "$context" get svc "$service_name" -n "$namespace" -o jsonpath='{.status.loadBalancer.ingress[0].ip}{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null); then
-        echo "Failed to get service $service_name in context $context, skipping..." >&2
-        return 1
-    fi
-    
-    if [ -z "$output" ]; then
-        echo "No IP/hostname found for service $service_name in context $context, skipping..." >&2
-        return 1
-    fi
-    
-    echo "$output"
-    return 0
 }
 
 # Initialize variables
@@ -33,23 +25,19 @@ TRAEFIK_AKS_IP=""
 TRAEFIK_EKS_IP=""
 TRAEFIK_GKE_IP=""
 
-# Get AKS IP if context exists and service is available
-if AKS_OUTPUT=$(get_service_address aks-traefik-demo traefik-aks traefik); then
-    TRAEFIK_AKS_IP=$AKS_OUTPUT
+# Get AKS IP from Terraform
+if AKS_IP=$(get_tf_ip aks 2>/dev/null); then
+    TRAEFIK_AKS_IP=$AKS_IP
 fi
 
-# Get EKS hostname and resolve to IP if context exists and service is available
-if EKS_OUTPUT=$(get_service_address eks-traefik-demo traefik-eks traefik); then
-    if EKS_IP=$(dig +short "$EKS_OUTPUT" | head -n 1); then
-        TRAEFIK_EKS_IP=$EKS_IP
-    else
-        echo "WARNING: Could not resolve IP address for $EKS_OUTPUT" >&2
-    fi
+# Get EKS IP from Terraform
+if EKS_IP=$(get_tf_ip eks 2>/dev/null); then
+    TRAEFIK_EKS_IP=$EKS_IP
 fi
 
-# Get GKE IP if context exists and service is available
-if GKE_OUTPUT=$(get_service_address gke-traefik-demo traefik-gke traefik); then
-    TRAEFIK_GKE_IP=$GKE_OUTPUT
+# Get GKE IP from Terraform
+if GKE_IP=$(get_tf_ip gke 2>/dev/null); then
+    TRAEFIK_GKE_IP=$GKE_IP
 fi
 
 # Create a temporary file
@@ -70,8 +58,7 @@ TMP_HOSTS=$(mktemp)
     done < "/etc/hosts"
 
     # Add our entries with a single header
-    echo ""
-    echo "# Traefik dashboard entries - auto-generated from kubectl outputs"
+    echo "# Traefik dashboard entries - auto-generated from Terraform outputs"
     
     # Only add entries for services that were successfully retrieved
     if [ -n "$TRAEFIK_AKS_IP" ]; then

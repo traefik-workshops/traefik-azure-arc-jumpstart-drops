@@ -178,13 +178,31 @@ User company:
 
 ![auth-settings-oidc](./media/auth-settings-oidc.png)
 
-First, update the Traefik Hub Management gateway access settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
+Then update the Gateway JWT settings and add the Microsoft Entra ID JWKS endpoint under `Token validation method`. And enter `roles` under JWT claims mapping:
 
   ```shell
   echo login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/discovery/v2.0/keys
   ```
 
 ![auth-settings-jwt](./media/auth-settings-jwt.png)
+
+### Create a application inside the Traefik Developer Portal
+
+First, you will need the user credentials to login to the Traefik Developer Portal. 
+
+  ```shell
+  username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
+  echo $username
+  ```
+
+The password is `topsecretpassword`.
+
+You can now view your Traefik Airlines Developer Portal on the rest Arc-enabled Kubernetes clusters at:
+
+[http://portal.traefik-airlines.aks](http://portal.traefik-airlines.aks)
+[http://portal.traefik-airlines.localhost:8000](http://portal.traefik-airlines.localhost:8000)
+[http://portal.traefik-airlines.eks](http://portal.traefik-airlines.eks)
+[http://portal.traefik-airlines.gke](http://portal.traefik-airlines.gke)
 
 ## Testing
 
@@ -207,16 +225,6 @@ First, get the username:
   username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
   echo $username
   ```
-
-Secondly, get the consent link:
-
-```shell
-echo "https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/authorize?client_id=$(terraform output -raw entraIDApplicationClientID)&response_type=code&response_mode=query&scope=User.Read&prompt=consent"
-```
-
-Use the consent link to login with the user that you are generating a token for and consent to the application permissions. The password is `topsecretpassword`. You will be required to setup MFA for the user. 
-
-  > **Note:** The consent flow will give an error at end of the flow, but the consent will be submitted successfully.
 
   ```shell
   access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \

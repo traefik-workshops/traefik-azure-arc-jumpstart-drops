@@ -1,6 +1,6 @@
 locals {
-  k3d_cluster_name = "k3d-traefik-demo"
   aks_cluster_name = "aks-traefik-demo"
+  k3d_cluster_name = "k3d-traefik-demo"
   eks_cluster_name = "eks-traefik-demo"
   gke_cluster_name = "gke-traefik-demo"
 }
@@ -48,6 +48,12 @@ resource "null_resource" "arc_aks_cluster" {
   depends_on = [ module.aks ]
 }
 
+provider "kubernetes" {
+  alias = "aks"
+
+  config_path    = "~/.kube/config"
+  config_context = local.aks_cluster_name
+}
 
 resource "null_resource" "arc_k3d_cluster" {
   provisioner "local-exec" {
@@ -71,6 +77,13 @@ resource "null_resource" "arc_k3d_cluster" {
   }
 
   count = var.enableK3D ? 1 : 0
+}
+
+provider "kubernetes" {
+  alias = "k3d"
+
+  config_path    = "~/.kube/config"
+  config_context = local.k3d_cluster_name
 }
 
 resource "null_resource" "arc_eks_cluster" {
@@ -99,6 +112,15 @@ resource "null_resource" "arc_eks_cluster" {
   }
 
   count = var.enableEKS ? 1 : 0
+}
+
+
+
+provider "kubernetes" {
+  alias = "eks"
+
+  config_path    = "~/.kube/config"
+  config_context = local.eks_cluster_name
 }
 
 resource "null_resource" "arc_gke_cluster" {
@@ -130,6 +152,14 @@ resource "null_resource" "arc_gke_cluster" {
   }
 
   count = var.enableGKE ? 1 : 0
+}
+
+provider "kubernetes" {
+  alias = "gke"
+
+  config_path    = "~/.kube/config"
+  # config_context = local.gke_cluster_name
+  config_context = "gke_"
 }
 
 resource "null_resource" "arc_clusters" {

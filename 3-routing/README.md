@@ -149,10 +149,10 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
 Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
-  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  aks_address="$(terraform output -raw aksTraefikIPs)"
   k3d_address="localhost:8000"
-  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
-  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+  eks_address="$(terraform output -raw eksTraefikIPs)"
+  gke_address="$(terraform output -raw gkeTraefikIPs)"
   ```
 
 ### Services

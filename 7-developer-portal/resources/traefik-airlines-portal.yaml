@@ -1,0 +1,31 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPortal
+metadata:
+  name: traefik-airlines-portal
+  namespace: traefik-airlines
+spec:
+  title: Traefik Airlines API Portal
+  description: "API Portal for Traefik Airlines"
+  trustedUrls:
+    - http://portal.traefik-airlines.EXTERNAL_IP.sslip.io
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-airlines-apiportal
+  namespace: traefik-airlines
+  annotations:
+    hub.traefik.io/api-portal: traefik-airlines-portal
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`portal.traefik-airlines.EXTERNAL_IP.sslip.io`)
+    kind: Rule
+    services:
+    - name: apiportal
+      namespace: traefik
+      port: 9903
+  tls:
+    certResolver: traefik-airlines

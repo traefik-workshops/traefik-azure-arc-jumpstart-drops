@@ -188,6 +188,14 @@ You can now view your Traefik dashboard on the rest Arc-enabled Kubernetes clust
 [http://dashboard.traefik.eks:8080](http://dashboard.traefik.eks:8080)
 [http://dashboard.traefik.gke:8080](http://dashboard.traefik.gke:8080)
 
+You can run the following commands to get the IP addresses of the Arc-enabled Kubernetes clusters if you choose to update your `/etc/hosts` file manually:
+
+  ```shell
+  terraform output traefikAKSIP
+  terraform output traefikEKSIP
+  terraform output traefikGKEIP
+  ```
+
 ## ARM Template Example
 
 To be able to deploy Arc specific marketplace applications with Terraform, you need to use the `azurerm_resource_group_template_deployment` resource. You can simply copy the ARM template from the Azure Marketplace portal when reviewing the marketplace application install, and paste it into the `template_content` variable in the `azurerm_resource_group_template_deployment` resource. The [traefik.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/traefik.tf) file is an example of how to deploy the Traefik for Azure Arc marketplace application using ARM templates with Terraform.
