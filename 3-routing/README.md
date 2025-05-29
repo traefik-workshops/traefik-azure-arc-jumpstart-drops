@@ -159,22 +159,22 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 
   Customers service:
   ```shell
-  curl http://$aks_address -H "Host: customers.traefik-airlines"
+  curl -i http://$aks_address -H "Host: customers.traefik-airlines"
   ```
 
   Employees service:
   ```shell
-  curl http://$k3d_address -H "Host: employees.traefik-airlines"
+  curl -i http://$k3d_address -H "Host: employees.traefik-airlines"
   ```
 
   Flights service:
   ```shell
-  curl http://$eks_address -H "Host: flights.traefik-airlines"
+  curl -i http://$eks_address -H "Host: flights.traefik-airlines"
   ```
 
   Tickets service:
   ```shell
-  curl http://$gke_address -H "Host: tickets.traefik-airlines"
+  curl -i http://$gke_address -H "Host: tickets.traefik-airlines"
   ```
 
 ## Use FluxCD to deploy Traefik Airlines

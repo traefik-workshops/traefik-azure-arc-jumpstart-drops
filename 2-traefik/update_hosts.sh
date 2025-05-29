@@ -6,14 +6,8 @@ get_tf_ip() {
     local provider=$1
     local ip_output
     
-    if ip_output=$(cd "$(dirname "$0")/.." && terraform output -raw "${provider}_traefik_ips" 2>/dev/null); then
-        # For EKS, take the first IP if there are multiple
-        if [[ "$provider" == "eks" ]]; then
-            IFS=',' read -r -a ips <<< "$ip_output"
-            echo "${ips[0]}"  # Return first IP for EKS
-        else
-            echo "$ip_output"
-        fi
+    if ip_output=$(cd "$(dirname "$0")/.." && terraform output -raw "traefik${provider}IP" 2>/dev/null); then
+        echo "$ip_output"
     else
         echo "Failed to get IP for $provider from Terraform" >&2
         return 1
@@ -26,17 +20,17 @@ TRAEFIK_EKS_IP=""
 TRAEFIK_GKE_IP=""
 
 # Get AKS IP from Terraform
-if AKS_IP=$(get_tf_ip aks 2>/dev/null); then
+if AKS_IP=$(get_tf_ip AKS 2>/dev/null); then
     TRAEFIK_AKS_IP=$AKS_IP
 fi
 
 # Get EKS IP from Terraform
-if EKS_IP=$(get_tf_ip eks 2>/dev/null); then
+if EKS_IP=$(get_tf_ip EKS 2>/dev/null); then
     TRAEFIK_EKS_IP=$EKS_IP
 fi
 
 # Get GKE IP from Terraform
-if GKE_IP=$(get_tf_ip gke 2>/dev/null); then
+if GKE_IP=$(get_tf_ip GKE 2>/dev/null); then
     TRAEFIK_GKE_IP=$GKE_IP
 fi
 

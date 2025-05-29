@@ -146,7 +146,7 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 
   ```shell
   aks_ip="$(terraform output -raw traefikAKSIP)"
-  sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/traefik-airlines-tls.yaml" | \
+  sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/tls-routes.yaml" | \
   kubectl apply \
     --namespace "traefik-airlines" \
     --context "aks-traefik-demo" -f -;
@@ -195,18 +195,10 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
 
 Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
-### AKS/GKE
-
   ```shell
   aks_address=$(terraform output -raw traefikAKSIP)
+  eks_address=$(terraform output -raw traefikEKSIP)
   gke_address=$(terraform output -raw traefikGKEIP)
-  ```
-
-### EKS
-
-  ```shell
-  eks_address_0=$(terraform output -raw traefikEKSIP | awk -F',' '{print $1}')
-  eks_address_1=$(terraform output -raw traefikEKSIP | awk -F',' '{print $2}')
   ```
 
 ### Customers service
@@ -218,19 +210,19 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 ### Employees service
 
   ```shell
-  curl https://employees.traefik-airlines.${gke_address}.sslip.io
+  curl https://employees.traefik-airlines.${aks_address}.sslip.io
   ```
 
 ### Flights service
 
   ```shell
-  curl https://flights.traefik-airlines.${eks_address_0}.sslip.io
+  curl https://flights.traefik-airlines.${eks_address}.sslip.io
   ```
 
 ### Tickets service
 
   ```shell
-  curl https://tickets.traefik-airlines.${eks_address_1}.sslip.io
+  curl https://tickets.traefik-airlines.${gke_address}.sslip.io
   ```
 
 ## Teardown
