@@ -162,6 +162,12 @@ If you would like to view the Traefik dashboard on the rest of the Arc-enabled K
   sudo ./2-traefik/update_hosts.sh
   ```
 
+  > **Note:** You may need to change the script permissions to make it executable:
+
+  ```shell
+  chmod +x ./2-traefik/update_hosts.sh
+  ```
+
 Example output to `/etc/hosts` file:
 
   ```shell

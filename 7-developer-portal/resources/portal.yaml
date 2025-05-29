@@ -8,7 +8,7 @@ spec:
   title: Traefik Airlines API Portal
   description: "API Portal for Traefik Airlines"
   trustedUrls:
-    - http://portal.traefik-airlines.EXTERNAL_IP.sslip.io
+    - https://portal.traefik-airlines.EXTERNAL_IP.sslip.io
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute

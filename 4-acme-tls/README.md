@@ -158,6 +158,12 @@ Deploy TLS enabled routes to the cluster of your choice. Make sure to replace th
   ./4-acme-tls/deploy-tls.sh
   ```
 
+  > **Note:** You may need to change the script permissions to make it executable:
+
+  ```shell
+  chmod +x ./4-acme-tls/deploy-tls.sh
+  ```
+
   Example output:
 
   ```shell

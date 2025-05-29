@@ -45,9 +45,9 @@ locals {
   }
 
   traefik_ips = {
-    aks = trimspace(data.local_file.traefik_ip["aks"].content)
-    eks = trimspace(data.local_file.traefik_ip["eks"].content)
-    gke = trimspace(data.local_file.traefik_ip["gke"].content)
+    aks = var.enableAKS ? trimspace(data.local_file.traefik_ip["aks"].content) : ""
+    eks = var.enableEKS ? trimspace(data.local_file.traefik_ip["eks"].content) : ""
+    gke = var.enableGKE ? trimspace(data.local_file.traefik_ip["gke"].content) : ""
   }
 }
 

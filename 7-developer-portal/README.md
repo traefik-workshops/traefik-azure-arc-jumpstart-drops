@@ -99,7 +99,7 @@ The terraform script will create a Microsoft Entra ID application and a group fo
 
 ## Getting Started
 
-You need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow [this](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin) guide to grab the license key for each cluster.
+To complete this drop you will need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow [this](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin) guide to grab the license key for each cluster.
 
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
@@ -186,6 +186,49 @@ Then update the Gateway JWT settings and add the Microsoft Entra ID JWKS endpoin
 
 ![auth-settings-jwt](./media/auth-settings-jwt.png)
 
+### Deploy Traefik Developer Portal CRDs
+Deploy portal CRDs to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-portal.sh` script to deploy the portal CRDs to all clusters.
+
+### AKS
+
+  ```shell
+  aks_ip="$(terraform output -raw traefikAKSIP)"
+  sed "s/EXTERNAL_IP/$aks_ip/g" "7-developer-portal/resources/portal.yaml" | \
+  kubectl apply \
+    --namespace "traefik-airlines" \
+    --context "aks-traefik-demo" -f -;
+  ```
+
+### AKS/EKS/GKE
+
+  ```shell
+  ./7-developer-portal/deploy-portal.sh
+  ```
+
+  > **Note:** You may need to change the script permissions to make it executable:
+
+  ```shell
+  chmod +x ./7-developer-portal/deploy-portal.sh
+  ```
+
+  Example output:
+
+  ```shell
+  Processing AKS...
+  Deploying Portal resources to aks-traefik-demo with IP: 40.125.40.112
+  apiportal.hub.traefik.io/traefik-airlines-portal created
+  ingressroute.traefik.io/traefik-airlines-apiportal created
+  Processing EKS...
+  Deploying Portal resources to eks-traefik-demo with IP: 54.67.105.168
+  apiportal.hub.traefik.io/traefik-airlines-portal created
+  ingressroute.traefik.io/traefik-airlines-apiportal created
+  Processing GKE...
+  Deploying Portal resources to gke-traefik-demo with IP: 34.106.174.107
+  apiportal.hub.traefik.io/traefik-airlines-portal created
+  ingressroute.traefik.io/traefik-airlines-apiportal created
+  Portal resources deployment completed.
+  ```
+
 ### Create a application inside the Traefik Developer Portal
 
 First, you will need the user credentials to login to the Traefik Developer Portal. 
@@ -197,34 +240,36 @@ First, you will need the user credentials to login to the Traefik Developer Port
 
 The password is `topsecretpassword`.
 
-You can now view your Traefik Airlines Developer Portal on the rest Arc-enabled Kubernetes clusters at:
+You can now access the portal on the Arc-enabled Kubernetes clusters with public IP addresses:
 
-[http://portal.traefik-airlines.aks](http://portal.traefik-airlines.aks)
-[http://portal.traefik-airlines.localhost:8000](http://portal.traefik-airlines.localhost:8000)
-[http://portal.traefik-airlines.eks](http://portal.traefik-airlines.eks)
-[http://portal.traefik-airlines.gke](http://portal.traefik-airlines.gke)
+#### AKS
+
+  ```shell
+  aks_address=$(terraform output -raw traefikAKSIP)
+  echo "https://portal.traefik-airlines.${aks_address}.sslip.io"
+  ```
+
+#### EKS
+
+  ```shell
+  eks_address=$(terraform output -raw traefikEKSIP)
+  echo "https://portal.traefik-airlines.${eks_address}.sslip.io"
+  ```
+
+#### GKE
+
+  ```shell
+  gke_address=$(terraform output -raw traefikGKEIP)
+  echo "https://portal.traefik-airlines.${gke_address}.sslip.io"
+  ```
+
+Lastly, create an application inside the Traefik Developer Portal with the same name as your user, for example, `customer`.
 
 ## Testing
 
-Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
-
-  ```shell
-  aks_address="$(kubectl get svc traefik-aks --namespace traefik --context aks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  k3d_address="localhost:8000"
-  eks_address="$(kubectl get svc traefik-eks --namespace traefik --context eks-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
-  gke_address="$(kubectl get svc traefik-gke --namespace traefik --context gke-traefik-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-  ```
-
 ### Generate JWT token
 
-Before you generate a JWT token, you must login with the user that you are generating a token for and consent to the application permissions.
-
-First, get the username:
-
-  ```shell
-  username=$(terraform output entraIDUsers | grep -oE '"[^"]+"' | head -n1 | tr -d '"')
-  echo $username
-  ```
+You can run the following command to generate a JWT token:
 
   ```shell
   access_token=$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
@@ -237,7 +282,7 @@ First, get the username:
     -d "password=topsecretpassword" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
   ```
 
-  Verify that you obtained the access token correctly:
+Verify that you obtained the access token correctly:
 
   ```shell
   echo $access_token
@@ -246,25 +291,25 @@ First, get the username:
 ### Customers service
 
   ```shell
-  curl -v http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl -v http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl -v http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl -v http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown
