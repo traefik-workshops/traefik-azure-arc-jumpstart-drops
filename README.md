@@ -1,34 +1,42 @@
 # traefik-azure-arc-jumpstart-drops
 
-This repository demonstrates how to create a Terraform based Infrastructure as Code (IaC) multi-cluster Arc-enabled Kubernetes environment that serves traffic through Traefik Proxy to multiple sample microservices applications across the clusters. The deployment includes:
+This repository demonstrates how to create a Terraform based Infrastructure as Code (IaC) multi-cluster Arc-enabled Kubernetes environment that serves traffic through Traefik to multiple sample microservices applications across the clusters. The deployment includes:
 
-- Multiple Kubernetes clusters (AKS and k3d) connected to Azure Arc
-- Traefik Proxy deployment from Azure Arc Marketplace
+- Multiple Kubernetes clusters (AKS, k3d, EKS, and GKE) connected to Azure Arc
+- Traefik deployment from Azure Arc Marketplace
 - Sample microservices application deployment using FluxCD
 - Automated TLS certificate generation and management using Let's Encrypt and Traefik
+- Securing API using OAuth2.0 and Microsoft Entra ID
+- API Management using Traefik
+- Developer Portal using Traefik
 
 ## Architecture
 
 The deployment is split into four main components:
 
-1. **Clusters**: AKS and k3d cluster creation and Arc enablement
-2. **Traefik**: Deployment of Traefik Proxy from Azure Arc Marketplace
+1. **Clusters**: AKS, k3d, EKS, and GKE cluster creation and Arc enablement
+2. **Traefik**: Deployment of Traefik from Azure Arc Marketplace
 3. **Routing**: Sample application deployment with basic HTTP routing
 4. **TLS**: Automatic HTTPS with Let's Encrypt certificates
+5. **OAuth2.0**: Securing API using OAuth2.0 and Microsoft Entra ID
+6. **API Management**: API Management using Traefik
+7. **Developer Portal**: Developer Portal using Traefik
 
 ## Prerequisites
-* Clone the Traefik Azure Arc Jumpstart GitHub repository
 
-    ```shell
-    git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
-    ```
 * [Install or update Azure CLI to version 2.65.0 and above](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest). Use the below command to check your current installed version.
 
   ```shell
   az --version
   ```
 
-* [Install k3d](https://k3d.io/stable/#installation)
+* [Optional] [Install k3d](https://k3d.io/stable/#installation)
+
+* [Optional] [Install and configure awscli if you plan to deploy EKS](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+
+* [Optional] [Install and configure gcloud if you plan to deploy GKE](https://cloud.google.com/sdk/docs/install)
+
+* [Optional] [Install gke-cloud-auth-plugin if you plan to deploy GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
 
 * [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 
@@ -105,18 +113,10 @@ The deployment is split into four main components:
 
 ## Getting Started
 
-You can deploy the entire stack using the following command or deploy and test each component sequentially.
-
-### Deploy the entire stack
-
-```shell
-terraform init
-terraform apply -var="azureSubscriptionId=$(az account show --query id -o tsv)"
-```
-
-### Deploy and test each component sequentially
-
 1. [Clusters](1-clusters/README.md)
 2. [Traefik](2-traefik/README.md)
 3. [Routing](3-routing/README.md)
 4. [TLS](4-acme-tls/README.md)
+5. [OAuth2.0](5-oauth2/README.md)
+6. [API Management](6-api-management/README.md)
+7. [Developer Portal](7-developer-portal/README.md)
