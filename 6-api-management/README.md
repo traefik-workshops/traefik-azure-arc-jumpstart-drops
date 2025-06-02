@@ -213,6 +213,23 @@ Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed 
   traefik-airlines-employees       10m
   ```
 
+### API Managed Subscriptions CRDs
+
+  ```shell
+  kubectl get managedsubscriptions --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context gke-traefik-demo
+  ```
+
+  Output will look like this:
+
+  ```shell
+  NAME                             AGE
+  customer-subscription            10m
+  employee-subscription            10m
+  ```
+
 ## Teardown
 
 To remove the Arc-enabled clusters, run the following commands:

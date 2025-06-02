@@ -214,7 +214,7 @@ resource "azurerm_arc_kubernetes_flux_configuration" "traefik_hub_management_dep
 
   kustomizations {
     name                       = "redis"
-    path                       = "management/dependencies/redis"
+    path                       = "flux/management/dependencies/redis"
     depends_on                 = []
     garbage_collection_enabled = false
     recreating_enabled         = false
