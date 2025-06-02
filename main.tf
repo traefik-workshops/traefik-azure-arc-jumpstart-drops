@@ -9,7 +9,7 @@ locals {
 
   kustomizations_path = "flux/${var.enableTraefikHubGateway ? "gateway" : var.enableTraefikHubManagement ? "management" : "proxy"}"
 
-  traefikAirlineVersion = "v0.0.32"
+  traefikAirlineVersion = "v0.0.33"
 }
 
 provider "azurerm" {
