@@ -1,28 +1,10 @@
-# Deploy Arc-enabled AKS, k3d, EKS, and GKE clusters with Terraform
+# Multi-cluster application security with OAuth2, Microsoft Entra ID and Traefik
 
 ## Overview
 
-This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clusters using Terraform. The deployment includes:
+This drop demonstrates how to enable OAuth2 with Traefik and Microsoft Entra ID to manage and secure your applications. It extends the previous drops by adding application security capabilities to the Traefik Airlines application.
 
-- **AKS Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
-
-- **k3d Cluster**:
-  - Local Kubernetes cluster using k3s in Docker
-  - Exposed ports for ingress (8000, 8443, 8080)
-  - Azure Arc extension installation
-
-- **EKS Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
-
-- **GKE Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
+Traefik can support any Oauth2.0 compliant Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
 ## Prerequisites
 
@@ -115,100 +97,95 @@ This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clust
 
 ## Getting Started
 
-Clone the Traefik Azure Arc Jumpstart GitHub repository:
+To complete this drop you will need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow [this](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin) guide to grab the license key for each cluster.
+
+Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install AKS cluster using Terraform:
+Install Traefik Hub Gateway and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="1-clusters/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubGateway=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
-You can also enable the install of k3d, EKS or GKE clusters as well using Terraform:
-
-#### k3d
-
-  ```shell
-  terraform -chdir=./1-clusters/k3d init
-  terraform -chdir=./1-clusters/k3d apply
-  ```
-
-#### EKS
-
-  ```shell
-  terraform -chdir=./1-clusters/eks init
-  terraform -chdir=./1-clusters/eks apply
-  ```
-
-#### GKE
-
-  ```shell
-  terraform -chdir=./1-clusters/gke init
-  terraform -chdir=./1-clusters/gke apply \
-    -var="googleProjectId=$(gcloud config get-value project)"
-  ```
-
-Once you finish installing the clusters you can run the following command to connect them to Azure Arc and create an AKS cluster. You can turn the AKS cluster off using the `enableAKS` variable:
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubGateway=true" \
     -var="enableK3D=true" \
+    -var="enableGKE=true" \
     -var="enableEKS=true" \
-    -var="enableGKE=true"
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
+
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
 
 ## Testing
 
-Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, and are accessible using `kubectl`:
+Verify that Traefik Airlines applications are exposed and secured through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
-  kubectl --context=aks-traefik-demo get nodes
-  kubectl --context=k3d-traefik-demo get nodes
-  kubectl --context=eks-traefik-demo get nodes
-  kubectl --context=gke-traefik-demo get nodes
+  aks_address="$(terraform output -raw traefikAKSIP)"
+  k3d_address="localhost:8000"
+  eks_address="$(terraform output -raw traefikEKSIP)"
+  gke_address="$(terraform output -raw traefikGKEIP)"
   ```
 
-## Arc-enable clusters
+### Generate JWT token
 
-Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup under [clusters.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/clusters.tf).
+  ```shell
+  access_token="$(curl -s -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
+    https://login.microsoftonline.com/$(terraform output -raw entraIDTenantID)/oauth2/v2.0/token \
+    -d "client_id=$(terraform output -raw entraIDApplicationClientID)" \
+    -d 'grant_type=client_credentials' \
+    -d "scope=$(terraform output -raw entraIDApplicationClientID)/.default" \
+    -d "client_secret=$(terraform output -raw entraIDApplicationClientSecret)" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)"
+  ```
 
-  ```hcl
-  resource "null_resource" "arc_aks_cluster" {
-    provisioner "local-exec" {
-      command = <<EOT
-        az connectedk8s connect \
-          --kube-context ${local.aks_cluster_name} \
-          --name "arc-${local.aks_cluster_name}" \
-          --resource-group ${azurerm_resource_group.traefik_demo.name}
-      EOT
-    }
+  Verify that you obtained the access token correctly:
 
-    provisioner "local-exec" {
-      when = destroy
-      command = <<EOT
-        az connectedk8s delete --force --yes \
-          --name "arc-aks-traefik-demo" \
-          --resource-group "traefik-demo"
+  ```shell
+  echo $access_token
+  ```
 
-        kubectl config delete-context "aks-traefik-demo" 2>/dev/null || true
-      EOT
-    }
+### Customers service
 
-    count      = var.enableAKS ? 1 : 0
-    depends_on = [ module.aks ]
-  }
+  ```shell
+  curl -i http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
+  ```
+
+### Employees service
+
+  ```shell
+  curl -i http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
+  ```
+
+### Flights service
+
+  ```shell
+  curl -i http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
+  ```
+
+### Tickets service
+
+  ```shell
+  curl -i http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown
@@ -217,22 +194,25 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="1-clusters/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubGateway=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
-
-  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
 
 If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubGateway=true" \
     -var="enableK3D=true" \
+    -var="enableGKE=true" \
     -var="enableEKS=true" \
-    -var="enableGKE=true"
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
 
 ### Extra Clusters

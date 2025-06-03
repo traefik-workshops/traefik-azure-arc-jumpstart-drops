@@ -1,28 +1,21 @@
-# Deploy Arc-enabled AKS, k3d, EKS, and GKE clusters with Terraform
+# Secure Traefik Airlines applications using Let's Encrypt and Traefik automated certificate management
 
 ## Overview
 
-This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clusters using Terraform. The deployment includes:
+This drop demonstrates how to enable automatic HTTPS for your services using Traefik's Let's Encrypt integration.
 
-- **AKS Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
+### TLS Configuration
 
-- **k3d Cluster**:
-  - Local Kubernetes cluster using k3s in Docker
-  - Exposed ports for ingress (8000, 8443, 8080)
-  - Azure Arc extension installation
+The deployment configures Traefik with:
 
-- **EKS Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
+- **Automatic Certificate Management**: Using Let's Encrypt to automatically generate and renew certificates
+- **HTTP Challenge**: For domain ownership verification
+- **Wildcard Domains**: Using sslip.io for easy testing
 
-- **GKE Cluster**:
-  - Single node pool with configurable VM size
-  - Exposed ports for ingress (80, 443, 8080)
-  - Azure Arc extension installation
+### Important Notes
+
+- AKS/EKS/GKE clusters support Let's Encrypt integration but k3d does not as it requires a public IP
+- Certificates are automatically stored and renewed by Traefik
 
 ## Prerequisites
 
@@ -115,100 +108,118 @@ This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clust
 
 ## Getting Started
 
-Clone the Traefik Azure Arc Jumpstart GitHub repository:
+Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install AKS cluster using Terraform:
+Update Traefik configuration to handle Let's Encrypt certificates:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
 
-You can also enable the install of k3d, EKS or GKE clusters as well using Terraform:
+  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
 
-#### k3d
-
-  ```shell
-  terraform -chdir=./1-clusters/k3d init
-  terraform -chdir=./1-clusters/k3d apply
-  ```
-
-#### EKS
-
-  ```shell
-  terraform -chdir=./1-clusters/eks init
-  terraform -chdir=./1-clusters/eks apply
-  ```
-
-#### GKE
-
-  ```shell
-  terraform -chdir=./1-clusters/gke init
-  terraform -chdir=./1-clusters/gke apply \
-    -var="googleProjectId=$(gcloud config get-value project)"
-  ```
-
-Once you finish installing the clusters you can run the following command to connect them to Azure Arc and create an AKS cluster. You can turn the AKS cluster off using the `enableAKS` variable:
+You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableK3D=true" \
-    -var="enableEKS=true" \
-    -var="enableGKE=true"
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
+  ```
+
+  > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
+
+Deploy TLS enabled routes to the cluster of your choice. Make sure to replace the `EXTERNAL_IP` with the external IP of your Traefik instance on each cluster. You can run this manually using the following commands or run the `deploy-tls.sh` script to deploy the TLS enabled routes to all clusters.
+
+### AKS
+
+  ```shell
+  aks_ip="$(terraform output -raw traefikAKSIP)"
+  sed "s/EXTERNAL_IP/$aks_ip/g" "4-acme-tls/resources/tls-routes.yaml" | \
+  kubectl apply \
+    --namespace "traefik-airlines" \
+    --context "aks-traefik-demo" -f -;
+  ```
+
+### AKS/EKS/GKE
+
+  ```shell
+  ./4-acme-tls/deploy-tls.sh
+  ```
+
+  > **Note:** You may need to change the script permissions to make it executable:
+
+  ```shell
+  chmod +x ./4-acme-tls/deploy-tls.sh
+  ```
+
+  Example output:
+
+  ```shell
+  Processing AKS...
+  Deploying TLS resources to aks-traefik-demo with IP: 40.125.40.112
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  Processing EKS...
+  Deploying TLS resources to eks-traefik-demo with IP: 54.67.105.168
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  Processing GKE...
+  Deploying TLS resources to gke-traefik-demo with IP: 34.106.210.103
+  ingressroute.traefik.io/customers-ingress-secure created
+  ingressroute.traefik.io/employees-ingress-secure created
+  ingressroute.traefik.io/flights-ingress-secure created
+  ingressroute.traefik.io/tickets-ingress-secure created
+  TLS resources deployment completed.
   ```
 
 ## Testing
 
-Verify that the AKS, k3d, EKS, and GKE clusters have been created successfully, and are accessible using `kubectl`:
+Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
 
   ```shell
-  kubectl --context=aks-traefik-demo get nodes
-  kubectl --context=k3d-traefik-demo get nodes
-  kubectl --context=eks-traefik-demo get nodes
-  kubectl --context=gke-traefik-demo get nodes
+  aks_address=$(terraform output -raw traefikAKSIP)
+  eks_address=$(terraform output -raw traefikEKSIP)
+  gke_address=$(terraform output -raw traefikGKEIP)
   ```
 
-## Arc-enable clusters
+### Customers service
 
-Connecting Kubernetes clusters to Azure Arc is only possible through the Azure CLI and the Terraform null resource. Here is an example of how to connect a k3d cluster to Azure Arc. You can view the example setup under [clusters.tf](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/blob/main/clusters.tf).
+  ```shell
+  curl https://customers.traefik-airlines.${aks_address}.sslip.io
+  ```
 
-  ```hcl
-  resource "null_resource" "arc_aks_cluster" {
-    provisioner "local-exec" {
-      command = <<EOT
-        az connectedk8s connect \
-          --kube-context ${local.aks_cluster_name} \
-          --name "arc-${local.aks_cluster_name}" \
-          --resource-group ${azurerm_resource_group.traefik_demo.name}
-      EOT
-    }
+### Employees service
 
-    provisioner "local-exec" {
-      when = destroy
-      command = <<EOT
-        az connectedk8s delete --force --yes \
-          --name "arc-aks-traefik-demo" \
-          --resource-group "traefik-demo"
+  ```shell
+  curl https://employees.traefik-airlines.${aks_address}.sslip.io
+  ```
 
-        kubectl config delete-context "aks-traefik-demo" 2>/dev/null || true
-      EOT
-    }
+### Flights service
 
-    count      = var.enableAKS ? 1 : 0
-    depends_on = [ module.aks ]
-  }
+  ```shell
+  curl https://flights.traefik-airlines.${eks_address}.sslip.io
+  ```
+
+### Tickets service
+
+  ```shell
+  curl https://tickets.traefik-airlines.${gke_address}.sslip.io
   ```
 
 ## Teardown
@@ -217,22 +228,18 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)"
   ```
-
-  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
 
 If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="1-clusters/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
     -var="enableK3D=true" \
-    -var="enableEKS=true" \
-    -var="enableGKE=true"
+    -var="enableGKE=true" \
+    -var="enableEKS=true"
   ```
 
 ### Extra Clusters

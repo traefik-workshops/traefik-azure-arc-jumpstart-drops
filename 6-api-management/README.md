@@ -1,23 +1,12 @@
-# Deploy k8s applications to multiple Arc-enabled Kubernetes clusters using FluxCD and expose them using Traefik
+# Multi-cluster API Management with Traefik Hub
 
 ## Overview
 
-This drop demonstrates how to deploy and expose a microservices application across multiple Arc-enabled Kubernetes clusters using FluxCD and Traefik.
+This drop demonstrates how to enable API management with Traefik Hub to manage and secure your applications. It extends the previous drops by adding API management capabilities to the Traefik Airlines application.
 
-### Application Architecture
+Traefik can support any Oauth2.0 compliant Identity Provider or you can use Traefik Hub Managements OOTB Identity Provider. In this drop we will use Microsoft Entra ID as the Identity Provider.
 
-The Traefik Airlines demo application consists of four microservices:
-
-- **Customers Service**: Manages customer data and loyalty programs
-- **Employees Service**: Handles employee information and scheduling
-- **Flights Service**: Manages flight schedules and availability
-- **Tickets Service**: Processes ticket bookings and reservations
-
-### Deployment Configuration
-
-- **GitOps with FluxCD**: Automated deployment from Git repository
-- **Traefik Integration**: Automatic service discovery and routing
-- **Multi-cluster Support**: Services accessible on all the deployed Arc-enabled Kubernetes clusters
+The terraform script will create a Microsoft Entra ID application and a group for each user type. The group will be used to assign the appropriate permissions to the user type. This will allow us to control access to the applications based on the user type with Traefik. 
 
 ## Prerequisites
 
@@ -110,23 +99,24 @@ The Traefik Airlines demo application consists of four microservices:
 
 ## Getting Started
 
+To complete this drop you will need a [Traefik Hub](https://hub.traefik.io/) account. You can sign up [here](https://hub.traefik.io/). If you have a Traefik Hub account, please navigate to the [gateways](https://hub.traefik.io/gateways) section and create a gateway per cluster. You will need the license key for each cluster to deploy the Traefik instances. You can follow [this](https://doc.traefik.io/traefik-hub/operations/installation#before-you-begin) guide to grab the license key for each cluster.
+
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
   git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
   ```
 
-Install Traefik Airlines k8s application:
+Install Traefik Hub Management and deploy Traefik API CRDs to manage Traefik Airlines routes:
 
   ```shell
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="3-routing/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubManagement=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
-
-  > **Note:** AKS cluster is enabled by default. You can turn that off using the `enableAKS` variable.
 
 You can also enable the install on k3d, EKS or GKE clusters as well using Terraform:
 
@@ -134,68 +124,110 @@ You can also enable the install on k3d, EKS or GKE clusters as well using Terraf
   cd traefik-azure-arc-jumpstart-drops
   terraform init
   terraform apply \
-    -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubManagement=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
 
   > **Note:** You must create those clusters before hand. Please refer to the [clusters](https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops/tree/main/1-clusters) drop for more information.
 
-## Testing
+### Traefik Custom Resource Definitions (CRDs)
 
-Verify that Traefik Airlines applications are exposed through Traefik on the Arc-enabled clusters. You can choose any of the clusters to test against.
+Traefik will utilize the following CRDs to manage your API resources across the Arc-enabled clusters:
+  
+#### API CRDs
+
+Please refer to the [API CRDs](https://doc.traefik.io/traefik-hub/api-management/api) documentation for more information.
+
+#### API Plan CRDs
+
+Please refer to the [API Plan CRDs](https://doc.traefik.io/traefik-hub/api-management/api-plans) documentation for more information.
+
+#### API Catalog Item CRDs
+
+Please refer to the [API Catalog Item CRDs](https://doc.traefik.io/traefik-hub/api-management/api-catalogitem) documentation for more information.
+
+### Testing
+
+Verify that Traefik Airlines API, Plan and Catalog Item CRDs have been deployed to the `traefik-airlines` namespace.
+
+### API CRDs
 
   ```shell
-  aks_address="$(terraform output -raw traefikAKSIP)"
-  k3d_address="localhost:8000"
-  eks_address="$(terraform output -raw traefikEKSIP)"
-  gke_address="$(terraform output -raw traefikGKEIP)"
+  kubectl get apis --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apis --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-### Services
+  Output will look like this:
 
-  Customers service:
   ```shell
-  curl -i http://$aks_address -H "Host: customers.traefik-airlines"
+  NAME            AGE
+  customers-api   10m
+  employees-api   10m
+  flights-api     10m
+  tickets-api     10m
   ```
 
-  Employees service:
+### API Plan CRDs
+
   ```shell
-  curl -i http://$k3d_address -H "Host: employees.traefik-airlines"
+  kubectl get apiplans --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apiplans --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-  Flights service:
+  Output will look like this:
+
   ```shell
-  curl -i http://$eks_address -H "Host: flights.traefik-airlines"
+  NAME                             AGE
+  traefik-airlines-bronze-plan     10m
+  traefik-airlines-gold-plan       10m
+  traefik-airlines-platinum-plan   10m
+  traefik-airlines-silver-plan     10m
   ```
 
-  Tickets service:
+### API Catalog Item CRDs
+
   ```shell
-  curl -i http://$gke_address -H "Host: tickets.traefik-airlines"
+  kubectl get apicatalogitems --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get apicatalogitems --namespace traefik-airlines --context gke-traefik-demo
   ```
 
-## Use FluxCD to deploy Traefik Airlines
-Azure Arc Kubernetes' recommended GitOps tool is FluxCD. FluxCD is used to deploy the Traefik Airlines application to the AKS cluster using Terraform in the follow code snippet.
+  Output will look like this:
 
-  ```hcl
-  resource "azurerm_arc_kubernetes_flux_configuration" "traefik_airlines" {
-    name       = "traefik-airlines"
-    cluster_id = "traefik-arc-aks-demo"
-    namespace  = "traefik-airlines"
+  ```shell
+  NAME                             AGE
+  traefik-airlines-customers       10m
+  traefik-airlines-employees       10m
+  ```
 
-    git_repository {
-      url = "https://github.com/traefik-workshops/traefik-airlines.git"
-      reference_type = "tag"
-      reference_value = "v0.0.13"
-    }
+### API Managed Subscriptions CRDs
 
-    kustomizations {
-      name = "traefik-airlines"
-    }
-  }
+  ```shell
+  kubectl get managedsubscriptions --namespace traefik-airlines --context aks-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context k3d-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context eks-traefik-demo
+  kubectl get managedsubscriptions --namespace traefik-airlines --context gke-traefik-demo
+  ```
+
+  Output will look like this:
+
+  ```shell
+  NAME                             AGE
+  customer-subscription            10m
+  employee-subscription            10m
   ```
 
 ## Teardown
@@ -204,20 +236,25 @@ To remove the Arc-enabled clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
-    -var="azureSubscriptionId=$(az account show --query id -o tsv)"
+    -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
+    -var="enableTraefikHubManagement=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>"
   ```
 
 If you enabled k3d, EKS or GKE clusters, run the following commands:
 
   ```shell
   terraform destroy \
-    -var-file="3-routing/terraform.tfvars" \
     -var="azureSubscriptionId=$(az account show --query id -o tsv)" \
     -var="googleProjectId=$(gcloud config get-value project)" \
+    -var="enableTraefikHubManagement=true" \
     -var="enableK3D=true" \
     -var="enableGKE=true" \
-    -var="enableEKS=true"
+    -var="enableEKS=true" \
+    -var="traefikHubAKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_1>" \
+    -var="traefikHubK3DLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_2>" \
+    -var="traefikHubEKSLicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_3>" \
+    -var="traefikHubGKELicenseKey=<YOUR_TRAEFIK_HUB_LICENSE_KEY_4>"
   ```
 
 ### Extra Clusters
