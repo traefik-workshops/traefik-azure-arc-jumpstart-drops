@@ -201,25 +201,25 @@ Verify that Traefik Airlines applications are exposed through Traefik on the Arc
 ### Customers service
 
   ```shell
-  curl https://customers.traefik-airlines.${aks_address}.sslip.io
+  curl https://customers.airlines.traefik.${aks_address}.sslip.io
   ```
 
 ### Employees service
 
   ```shell
-  curl https://employees.traefik-airlines.${aks_address}.sslip.io
+  curl https://employees.airlines.traefik.${aks_address}.sslip.io
   ```
 
 ### Flights service
 
   ```shell
-  curl https://flights.traefik-airlines.${eks_address}.sslip.io
+  curl https://flights.airlines.traefik.${eks_address}.sslip.io
   ```
 
 ### Tickets service
 
   ```shell
-  curl https://tickets.traefik-airlines.${gke_address}.sslip.io
+  curl https://tickets.airlines.traefik.${gke_address}.sslip.io
   ```
 
 ## Teardown

@@ -1,7 +1,7 @@
 locals {
-  aks_redirect_uri = var.enableAKS ? ["https://portal.traefik-airlines.${local.traefik_ips["aks"]}.sslip.io/callback"] : []
-  eks_redirect_uri = var.enableEKS ? ["https://portal.traefik-airlines.${local.traefik_ips["eks"]}.sslip.io/callback"] : []
-  gke_redirect_uri = var.enableGKE ? ["https://portal.traefik-airlines.${local.traefik_ips["gke"]}.sslip.io/callback"] : []
+  aks_redirect_uri = var.enableAKS ? ["https://portal.airlines.traefik.${local.traefik_ips["aks"]}.sslip.io/callback"] : []
+  eks_redirect_uri = var.enableEKS ? ["https://portal.airlines.traefik.${local.traefik_ips["eks"]}.sslip.io/callback"] : []
+  gke_redirect_uri = var.enableGKE ? ["https://portal.airlines.traefik.${local.traefik_ips["gke"]}.sslip.io/callback"] : []
   redirect_uris = concat(local.aks_redirect_uri, local.eks_redirect_uri, local.gke_redirect_uri)
 }
 

@@ -167,25 +167,25 @@ Verify that Traefik Airlines applications are exposed and secured through Traefi
 ### Customers service
 
   ```shell
-  curl -i http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$aks_address -H "Host: customers.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl -i http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$k3d_address -H "Host: employees.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl -i http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$eks_address -H "Host: flights.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl -i http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$gke_address -H "Host: tickets.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown

@@ -8,7 +8,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`customers.traefik-airlines.EXTERNAL_IP.sslip.io`)
+    - match: Host(`customers.airlines.traefik.EXTERNAL_IP.sslip.io`)
       services:
         - name: customers-app
           port: 3000
@@ -24,7 +24,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`employees.traefik-airlines.EXTERNAL_IP.sslip.io`)
+    - match: Host(`employees.airlines.traefik.EXTERNAL_IP.sslip.io`)
       services:
         - name: employees-app
           port: 3000
@@ -40,7 +40,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`flights.traefik-airlines.EXTERNAL_IP.sslip.io`)
+    - match: Host(`flights.airlines.traefik.EXTERNAL_IP.sslip.io`)
       services:
         - name: flights-app
           port: 3000
@@ -56,7 +56,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`tickets.traefik-airlines.EXTERNAL_IP.sslip.io`)
+    - match: Host(`tickets.airlines.traefik.EXTERNAL_IP.sslip.io`)
       services:
         - name: tickets-app
           port: 3000

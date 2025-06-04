@@ -246,21 +246,21 @@ You can now access the portal on the Arc-enabled Kubernetes clusters with public
 
   ```shell
   aks_address=$(terraform output -raw traefikAKSIP)
-  echo "https://portal.traefik-airlines.${aks_address}.sslip.io"
+  echo "https://portal.airlines.traefik.${aks_address}.sslip.io"
   ```
 
 #### EKS
 
   ```shell
   eks_address=$(terraform output -raw traefikEKSIP)
-  echo "https://portal.traefik-airlines.${eks_address}.sslip.io"
+  echo "https://portal.airlines.traefik.${eks_address}.sslip.io"
   ```
 
 #### GKE
 
   ```shell
   gke_address=$(terraform output -raw traefikGKEIP)
-  echo "https://portal.traefik-airlines.${gke_address}.sslip.io"
+  echo "https://portal.airlines.traefik.${gke_address}.sslip.io"
   ```
 
 Last, you can access the Traefik Developer Portal at the above URL and create an application and checkout any API from the catalog. Or you can set the Application ID to `customers` or `employees` to access the managed subscriptions created in the previous drop.
@@ -291,25 +291,25 @@ Verify that you obtained the access token correctly:
 ### Customers service
 
   ```shell
-  curl -i http://$aks_address -H "Host: customers.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$aks_address -H "Host: customers.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Employees service
 
   ```shell
-  curl -i http://$k3d_address -H "Host: employees.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$k3d_address -H "Host: employees.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Flights service
 
   ```shell
-  curl -i http://$eks_address -H "Host: flights.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$eks_address -H "Host: flights.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ### Tickets service
 
   ```shell
-  curl -i http://$gke_address -H "Host: tickets.traefik-airlines" -H "Authorization: Bearer $access_token"
+  curl -i http://$gke_address -H "Host: tickets.airlines.traefik" -H "Authorization: Bearer $access_token"
   ```
 
 ## Teardown
