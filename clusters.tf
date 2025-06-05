@@ -38,7 +38,7 @@ resource "null_resource" "arc_aks_cluster" {
     command = <<EOT
       az connectedk8s delete --force --yes \
         --name "arc-aks-traefik-demo" \
-        --resource-group "traefik-demo"
+        --resource-group "traefik-arc-demo"
 
       kubectl config delete-context "aks-traefik-demo" 2>/dev/null || true
     EOT
@@ -70,7 +70,7 @@ resource "null_resource" "arc_k3d_cluster" {
     command = <<EOT
       az connectedk8s delete --force --yes \
         --name "arc-k3d-traefik-demo" \
-        --resource-group "traefik-demo"
+        --resource-group "traefik-arc-demo"
 
       kubectl config delete-context "k3d-traefik-demo" 2>/dev/null || true
     EOT
@@ -105,7 +105,7 @@ resource "null_resource" "arc_eks_cluster" {
     command = <<EOT
       az connectedk8s delete --force --yes \
         --name "arc-eks-traefik-demo" \
-        --resource-group "traefik-demo"
+        --resource-group "traefik-arc-demo"
 
       kubectl config delete-context "eks-traefik-demo" 2>/dev/null || true
     EOT
@@ -145,7 +145,7 @@ resource "null_resource" "arc_gke_cluster" {
     command = <<EOT
       az connectedk8s delete --force --yes \
         --name "arc-gke-traefik-demo" \
-        --resource-group "traefik-demo"
+        --resource-group "traefik-arc-demo"
 
       kubectl config delete-context "gke-traefik-demo" 2>/dev/null || true
     EOT
@@ -158,8 +158,7 @@ provider "kubernetes" {
   alias = "gke"
 
   config_path    = "~/.kube/config"
-  # config_context = local.gke_cluster_name
-  config_context = "gke_"
+  config_context = local.gke_cluster_name
 }
 
 resource "null_resource" "arc_clusters" {

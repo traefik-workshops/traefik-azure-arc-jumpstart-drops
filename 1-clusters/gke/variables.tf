@@ -24,5 +24,5 @@ variable "gkeClusterMachineType" {
 variable "gkeClusterNodeCount" {
   type        = number
   description = "Number of nodes to use for the deployment"
-  default     = 1
+  default     = 2
 }

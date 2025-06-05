@@ -200,7 +200,7 @@ Connecting Kubernetes clusters to Azure Arc is only possible through the Azure C
       command = <<EOT
         az connectedk8s delete --force --yes \
           --name "arc-aks-traefik-demo" \
-          --resource-group "traefik-demo"
+          --resource-group "traefik-arc-demo"
 
         kubectl config delete-context "aks-traefik-demo" 2>/dev/null || true
       EOT

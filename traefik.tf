@@ -101,7 +101,7 @@ resource "null_resource" "azurerm_resource_group_template_deployment_traefik_des
       az k8s-extension delete --yes \
         --name "traefik-${each.key}" \
         --cluster-name "arc-${each.key}-traefik-demo" \
-        --resource-group "traefik-demo" \
+        --resource-group "traefik-arc-demo" \
         --cluster-type connectedClusters
 
       kubectl delete namespace traefik --context "${each.key}-traefik-demo"

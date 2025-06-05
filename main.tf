@@ -22,7 +22,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "traefik_demo" {
-  name     = "traefik-demo"
+  name     = "traefik-arc-demo"
   location = var.azureLocation
 }
 
