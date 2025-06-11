@@ -46,12 +46,12 @@ This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clust
 
 * Create Azure service principal (SP)
 
-  The Azure service principal assigned with the "Contributor" role is required to complete the scenario and its related automation. To create it, log in to your Azure account run the below command (you could also do this in [Azure Cloud Shell](https://shell.azure.com/)).
+  The Azure service principal assigned with the "Owner" role is required to complete the scenario and its related automation. To create it, log in to your Azure account run the below command (you could also do this in [Azure Cloud Shell](https://shell.azure.com/)).
 
     ```shell
     az login
     subscriptionId=$(az account show --query id --output tsv)
-    az ad sp create-for-rbac -n "<Unique SP Name>" --role "Contributor" --scopes /subscriptions/$subscriptionId
+    az ad sp create-for-rbac -n "<Unique SP Name>" --role "Owner" --scopes /subscriptions/$subscriptionId
     ```
 
     For example:
@@ -59,7 +59,7 @@ This drop demonstrates how to deploy and Arc-enable AKS, k3d, EKS, and GKE clust
     ```shell
     az login
     subscriptionId=$(az account show --query id --output tsv)
-    az ad sp create-for-rbac -n "JumpstartArcK8s" --role "Contributor" --scopes /subscriptions/$subscriptionId
+    az ad sp create-for-rbac -n "JumpstartArcK8s" --role "Owner" --scopes /subscriptions/$subscriptionId
     ```
 
     Output should look like this:
