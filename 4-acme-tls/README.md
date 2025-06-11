@@ -111,7 +111,7 @@ The deployment configures Traefik with:
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
-  git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
+  git clone https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops.git
   ```
 
 Update Traefik configuration to handle Let's Encrypt certificates:

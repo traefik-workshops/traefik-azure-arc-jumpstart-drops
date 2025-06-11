@@ -112,7 +112,7 @@ With Traefik, there is no need to maintain and synchronize a separate configurat
 Clone the Traefik Azure Arc Jumpstart GitHub repository
 
   ```shell
-  git clone https://github.com/traefik/traefik-azure-arc-jumpstart-drops.git
+  git clone https://github.com/traefik-workshops/traefik-azure-arc-jumpstart-drops.git
   ```
 
 Install [Traefik for Azure Arc](https://portal.azure.com/#view/Microsoft_Azure_Marketplace/GalleryItemDetailsBladeNopdl/id/containous.traefik-on-arc/) application using Terraform:
